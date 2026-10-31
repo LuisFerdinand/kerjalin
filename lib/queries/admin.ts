@@ -16,7 +16,6 @@ import {
   agentLevels,
   agents,
   orders,
-  products,
   user,
   walletEntries,
   withdrawals,
@@ -174,6 +173,29 @@ export async function getAdminOverview() {
     commission: num(r.gross) - num(r.admin),
   }));
 
+  // Pembagian omzet 30 hari: komisi penjualan agen, bonus tim, dan bagian Kerjalin.
+  const splitRes = await db.execute<{ orders: number; commission: string; override: string }>(sql`
+    select
+      (select count(*)::int from orders o
+        where o.status = 'paid'
+          and (o.paid_at at time zone 'UTC' at time zone 'Asia/Jakarta')::date >= (now() at time zone 'Asia/Jakarta')::date - 29) as orders,
+      coalesce((select sum(w.amount) from wallet_entries w join orders o on o.id = w.order_id
+        where o.status = 'paid' and w.type = 'commission'
+          and (o.paid_at at time zone 'UTC' at time zone 'Asia/Jakarta')::date >= (now() at time zone 'Asia/Jakarta')::date - 29), 0)::bigint as commission,
+      coalesce((select sum(w.amount) from wallet_entries w join orders o on o.id = w.order_id
+        where o.status = 'paid' and w.type = 'override'
+          and (o.paid_at at time zone 'UTC' at time zone 'Asia/Jakarta')::date >= (now() at time zone 'Asia/Jakarta')::date - 29), 0)::bigint as override
+  `);
+  const gross30 = daily.reduce((s, d) => s + d.gross, 0);
+  const admin30 = daily.reduce((s, d) => s + d.admin, 0);
+  const period = {
+    orders: num(splitRes.rows[0]?.orders),
+    gross: gross30,
+    admin: admin30,
+    commission: num(splitRes.rows[0]?.commission),
+    override: num(splitRes.rows[0]?.override),
+  };
+
   return {
     agents: agentStats,
     orders: {
@@ -189,6 +211,7 @@ export async function getAdminOverview() {
       paidAmount: num(wdStats?.paidAmount),
     },
     daily,
+    period,
     levelDistribution,
     recentOrders,
     recentAgents,
@@ -524,10 +547,6 @@ export async function listAgentOptions() {
 /*  Produk, pesanan, penarikan                                                 */
 /* -------------------------------------------------------------------------- */
 
-export async function listProductsAdmin() {
-  return db.select().from(products).orderBy(asc(products.sortOrder), asc(products.name));
-}
-
 export async function listOrders(params: { status?: OrderStatus; q?: string }) {
   const sellerUser = alias(user, "seller_user");
   const filters: (SQL | undefined)[] = [];
@@ -567,4 +586,50 @@ export async function listWithdrawals(params: { status?: WithdrawalStatus }) {
     .where(params.status ? eq(withdrawals.status, params.status) : undefined)
     .orderBy(desc(withdrawals.createdAt))
     .limit(200);
+}
+
+/** Jumlah agen per status untuk tab di daftar agen. */
+export async function getAgentCounts() {
+  const [row] = await db
+    .select({
+      all: sql<number>`count(*)::int`,
+      active: sql<number>`(count(*) filter (where ${agents.status} = 'active'))::int`,
+      pending: sql<number>`(count(*) filter (where ${agents.status} = 'pending'))::int`,
+      suspended: sql<number>`(count(*) filter (where ${agents.status} = 'suspended'))::int`,
+    })
+    .from(agents);
+  return { all: num(row?.all), active: num(row?.active), pending: num(row?.pending), suspended: num(row?.suspended) };
+}
+
+/** Jumlah pesanan per status untuk tab di daftar pesanan. */
+export async function getOrderCounts() {
+  const [row] = await db
+    .select({
+      all: sql<number>`count(*)::int`,
+      pending: sql<number>`(count(*) filter (where ${orders.status} = 'pending'))::int`,
+      paid: sql<number>`(count(*) filter (where ${orders.status} = 'paid'))::int`,
+      cancelled: sql<number>`(count(*) filter (where ${orders.status} = 'cancelled'))::int`,
+      refunded: sql<number>`(count(*) filter (where ${orders.status} = 'refunded'))::int`,
+    })
+    .from(orders);
+  return {
+    all: num(row?.all),
+    pending: num(row?.pending),
+    paid: num(row?.paid),
+    cancelled: num(row?.cancelled),
+    refunded: num(row?.refunded),
+  };
+}
+
+/** Jumlah penarikan per status. */
+export async function getWithdrawalCounts() {
+  const [row] = await db
+    .select({
+      all: sql<number>`count(*)::int`,
+      pending: sql<number>`(count(*) filter (where ${withdrawals.status} = 'pending'))::int`,
+      paid: sql<number>`(count(*) filter (where ${withdrawals.status} = 'paid'))::int`,
+      rejected: sql<number>`(count(*) filter (where ${withdrawals.status} = 'rejected'))::int`,
+    })
+    .from(withdrawals);
+  return { all: num(row?.all), pending: num(row?.pending), paid: num(row?.paid), rejected: num(row?.rejected) };
 }

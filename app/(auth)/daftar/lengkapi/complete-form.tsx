@@ -22,21 +22,21 @@ export function CompleteProfileForm({
   return (
     <div className="grid gap-6">
       <div className="grid gap-1.5">
-        <h1 className="text-3xl font-extrabold text-navy">Satu langkah lagi, {name.split(" ")[0]}!</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold text-navy">Satu langkah lagi, {name.split(" ")[0]}!</h1>
         <p className="text-muted-foreground">
           Lengkapi data berikut agar akun agen kamu bisa kami proses.
         </p>
       </div>
 
       {notice && (
-        <div className="flex items-start gap-3 rounded-xl bg-warning/10 p-3.5 text-sm text-navy">
-          <TriangleAlert className="mt-0.5 size-5 shrink-0 text-warning" />
+        <div className="flex items-start gap-3 rounded-xl bg-[#fff4d6] p-4 text-[0.9375rem] text-[#7a4a00]">
+          <TriangleAlert className="mt-0.5 size-5 shrink-0" />
           <p>{notice} Kamu bisa mengosongkan kode referral untuk bergabung langsung di bawah Kerjalin.</p>
         </div>
       )}
       {sponsorName && (
-        <div className="flex items-start gap-3 rounded-xl bg-brand-soft p-3.5 text-sm text-navy">
-          <BadgeCheck className="mt-0.5 size-5 shrink-0 text-brand" />
+        <div className="flex items-start gap-3 rounded-xl bg-card p-4 text-[0.9375rem] text-navy">
+          <BadgeCheck className="mt-0.5 size-5 shrink-0 text-navy" />
           <p>
             Kamu diundang oleh <strong>{sponsorName}</strong>.
           </p>
@@ -60,12 +60,12 @@ export function CompleteProfileForm({
         </FormField>
 
         {state && !state.ok && state.error && !state.fieldErrors && (
-          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-[0.9375rem] text-destructive">
             {state.error}
           </p>
         )}
 
-        <SubmitButton pending={pending} size="lg" className="h-11 text-sm font-semibold" pendingText="Menyimpan...">
+        <SubmitButton pending={pending} size="lg" className="h-11 text-[0.9375rem] font-semibold" pendingText="Menyimpan...">
           Selesaikan Pendaftaran
         </SubmitButton>
       </form>

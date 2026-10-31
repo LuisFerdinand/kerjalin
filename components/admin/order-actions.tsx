@@ -37,17 +37,54 @@ import { formatIDR } from "@/lib/format";
 import type { TreeNodeData } from "@/lib/queries/admin";
 import type { OrderStatus } from "@/db/schema";
 
+type SellableProduct = {
+  id: string;
+  name: string;
+  priceMonthly: number;
+  pricingPlans: { months: number; price: number; label?: string }[];
+};
+
+/** Paket yang bisa dipilih: paket produk, atau bulanan otomatis bila belum ada paket. */
+function plansOf(p: SellableProduct) {
+  return p.pricingPlans.length > 0
+    ? p.pricingPlans.map((pl) => ({ ...pl, label: pl.label || `${pl.months} bulan` }))
+    : [{ months: 1, price: p.priceMonthly, label: "Bulanan" }];
+}
+
 export function CreateOrderDialog({
   products,
   agents,
   trigger,
 }: {
-  products: { id: string; name: string; priceMonthly: number }[];
+  products: SellableProduct[];
   agents: TreeNodeData[];
   trigger: ReactNode;
 }) {
   const [productId, setProductId] = useState(products[0]?.id);
-  const price = products.find((p) => p.id === productId)?.priceMonthly ?? 0;
+  const product = products.find((p) => p.id === productId);
+  const plans = product ? plansOf(product) : [];
+  const [planIndex, setPlanIndex] = useState("0");
+  const plan = plans[Number(planIndex)] ?? plans[0];
+  const [months, setMonths] = useState(String(plan?.months ?? 1));
+  const [amount, setAmount] = useState(String(plan?.price ?? ""));
+
+  function pickProduct(id: string) {
+    setProductId(id);
+    const next = products.find((p) => p.id === id);
+    const first = next ? plansOf(next)[0] : undefined;
+    setPlanIndex("0");
+    setMonths(String(first?.months ?? 1));
+    setAmount(String(first?.price ?? ""));
+  }
+
+  function pickPlan(value: string) {
+    setPlanIndex(value);
+    const next = plans[Number(value)];
+    if (next) {
+      setMonths(String(next.months));
+      setAmount(String(next.price));
+    }
+  }
 
   return (
     <FormDialog
@@ -62,64 +99,93 @@ export function CreateOrderDialog({
         <>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Produk" name="productId" state={state}>
-              <Select name="productId" value={productId} onValueChange={setProductId}>
-                <SelectTrigger id="productId" className="h-10 w-full bg-background">
+              <Select name="productId" value={productId} onValueChange={pickProduct}>
+                <SelectTrigger id="productId" className="w-full">
                   <SelectValue placeholder="Pilih produk" />
                 </SelectTrigger>
                 <SelectContent>
                   {products.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
-                      {p.name} · {formatIDR(p.priceMonthly)}/bln
+                      {p.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </FormField>
-            <FormField label="Agen penjual" name="agentId" state={state}>
-              <AgentCombobox
-                name="agentId"
-                nodes={agents.filter((a) => a.status === "active")}
-                rootLabel="Penjualan langsung (tanpa agen)"
-              />
+            <FormField label="Paket langganan" name="plan" hint="Mengisi lama dan total harga di bawah.">
+              <Select value={planIndex} onValueChange={pickPlan}>
+                <SelectTrigger id="plan" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {plans.map((pl, i) => (
+                    <SelectItem key={pl.months} value={String(i)}>
+                      {pl.label} · {formatIDR(pl.price)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </FormField>
           </div>
 
+          <FormField label="Agen penjual" name="agentId" state={state}>
+            <AgentCombobox
+              name="agentId"
+              nodes={agents.filter((a) => a.status === "active")}
+              rootLabel="Penjualan langsung (tanpa agen)"
+            />
+          </FormField>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Nama pelanggan / usaha" name="customerName" state={state}>
-              <Input id="customerName" name="customerName" required className="h-10" />
+              <Input id="customerName" name="customerName" required />
             </FormField>
             <FormField label="WhatsApp pelanggan" name="customerPhone" state={state}>
-              <Input id="customerPhone" name="customerPhone" type="tel" className="h-10" />
+              <Input id="customerPhone" name="customerPhone" type="tel" />
             </FormField>
           </div>
 
           <FormField label="Email pelanggan" name="customerEmail" state={state}>
-            <Input id="customerEmail" name="customerEmail" type="email" className="h-10" />
+            <Input id="customerEmail" name="customerEmail" type="email" />
           </FormField>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Durasi langganan (bulan)" name="months" state={state}>
-              <Input id="months" name="months" type="number" min={1} max={36} defaultValue={1} required className="h-10" />
+            <FormField label="Lama langganan (bulan)" name="months" state={state}>
+              <Input
+                id="months"
+                name="months"
+                type="number"
+                min={1}
+                max={36}
+                value={months}
+                onChange={(e) => setMonths(e.target.value)}
+                required
+                className="tabular-nums"
+              />
             </FormField>
-            <FormField
-              label="Total dibayar (Rp)"
-              name="amount"
-              state={state}
-              hint={`Kosongkan untuk memakai harga produk (${formatIDR(price)} × bulan).`}
-            >
-              <Input id="amount" name="amount" type="number" min={0} step={1000} placeholder="Otomatis" className="h-10" />
+            <FormField label="Total dibayar (Rp)" name="amount" state={state} hint="Ubah bila ada diskon khusus.">
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                min={0}
+                step={1000}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="tabular-nums"
+              />
             </FormField>
           </div>
 
           <FormField label="Catatan" name="note" state={state}>
-            <Input id="note" name="note" className="h-10" />
+            <Input id="note" name="note" />
           </FormField>
 
-          <label className="flex items-center justify-between gap-4 rounded-xl border bg-muted/50 p-3.5">
+          <label className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/50 p-3.5">
             <span>
               <span className="block text-sm font-semibold text-navy">Sudah dibayar (lunas)</span>
-              <span className="block text-xs text-muted-foreground">
-                Aktifkan agar komisi langsung dibagikan ke agen & upline.
+              <span className="block text-[0.8125rem] text-muted-foreground">
+                Aktifkan agar komisi langsung dibagikan ke agen dan upline.
               </span>
             </span>
             <Switch name="markPaid" defaultChecked />

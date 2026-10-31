@@ -33,6 +33,11 @@ setelah login pertama** dan jangan pakai nilai seed di produksi.
 Ingin melihat panel terisi? `npm run db:seed:demo` membuat 8 agen contoh (3 level) dan 14 pesanan
 (login: `budi@demo.kerjalin.test` / `DemoKerjalin123`). Hapus dengan `npm run db:seed:demo:clean`.
 
+Ingin dashboard **akunmu sendiri** terisi? Daftar dulu lewat situs, lalu jalankan `npm run db:seed:me` (opsi
+`-- --email=kamu@email.com`, bawaannya `luissambas@gmail.com`). Skrip ini menambah 8 agen tim, 42 pesanan enam bulan
+terakhir lengkap dengan komisi dan bonus tim, tiga penarikan, serta katalog contoh (6 kategori, 8 produk). Hapus dengan
+`npm run db:seed:me:clean`. Bila server dev sudah berjalan, restart agar cache katalog ikut segar.
+
 ### Variabel lingkungan
 
 | Variabel | Wajib | Keterangan |
@@ -74,6 +79,18 @@ sehingga API secret tidak pernah sampai ke browser. Tanpa Cloudinary, kamu tetap
 | `npm run db:studio` | Drizzle Studio |
 | `npm run db:seed` | Seed dasar (aman diulang). `-- --reset-admin-password` untuk reset password admin |
 | `npm run db:seed:demo` / `db:seed:demo:clean` | Tambah / hapus data demo |
+| `npm run db:seed:me` / `db:seed:me:clean` | Isi / bersihkan dashboard satu akun agen dengan data contoh |
+
+## Checkout pelanggan
+
+Halaman produk punya tombol **Pesan Sekarang** (produk "segera hadir" memakai **Pesan Lebih Awal**) menuju
+`/checkout/<slug>?paket=<bulan>`. Pelanggan mengisi nama dan WhatsApp, lalu mendapat kode pesanan di `/pesanan/<kode>`.
+Pesanan berstatus **menunggu**; admin menandainya lunas di *Pesanan* setelah pembayaran dikonfirmasi manual, dan saat itu
+komisi dibagikan lewat `payOrder`. Harga dihitung ulang di server dari paket produk, bukan dari browser.
+
+Atribusi agen: kode yang diisi pembeli, lalu cookie `kj_ref`, lalu agen yang sedang masuk. Agen membagikan **link jual**
+per produk dari *Katalog produk*, yaitu `/r/<kode-referral>?to=/produk/<slug>` (tujuan `to` hanya boleh `/produk`,
+`/checkout`, atau `/daftar`). Perlindungan spam: kolom jebakan bot dan batas 3 pesanan menunggu per nomor per jam.
 
 ## Cara kerja jaringan agen
 

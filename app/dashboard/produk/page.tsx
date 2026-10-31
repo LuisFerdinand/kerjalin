@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { Boxes, Clock, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Boxes, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { StatusBadge } from "@/components/app/badges";
 import { CopyButton } from "@/components/app/copy-button";
 import { EmptyState, PageHeader } from "@/components/app/page-header";
 import { siteConfig } from "@/lib/config";
@@ -12,7 +11,7 @@ import { effectiveCommission } from "@/lib/mlm";
 import { getAgentCatalog } from "@/lib/queries/agent";
 import { requireAgent } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Katalog Produk" };
+export const metadata: Metadata = { title: "Katalog produk" };
 
 export default async function CatalogPage() {
   const { agent, level } = await requireAgent();
@@ -22,64 +21,68 @@ export default async function CatalogPage() {
   return (
     <>
       <PageHeader
-        title="Katalog Produk"
-        description={`Layanan yang bisa kamu tawarkan. Komisimu ${formatPercent(pct)} dari setiap langganan.`}
+        title="Katalog produk"
+        description={`Produk yang bisa kamu tawarkan. Komisimu ${formatPercent(pct)} dari total setiap langganan. Bagikan link jual agar pesanan pelanggan dicatat atas namamu.`}
       />
 
       {items.length === 0 ? (
         <EmptyState icon={Boxes} title="Belum ada produk" description="Produk baru akan segera ditambahkan oleh admin." />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="overflow-hidden rounded-xl border border-border">
           {items.map((p) => {
-            const link = `${siteConfig.url}/produk/${p.slug}`;
-            const caption = `${p.name} — ${p.tagline ?? ""}\nMulai ${formatIDR(p.priceMonthly)}/bulan.\nInfo lengkap: ${link}`;
+            const pageLink = `${siteConfig.url}/produk/${p.slug}`;
+            // Tautan jual: menyimpan kode referralmu lalu membuka halaman produk, sehingga pesanan dicatat atas namamu.
+            const link = `${siteConfig.url}/r/${agent.referralCode}?to=/produk/${p.slug}`;
+            const caption = `${p.name}: ${p.tagline ?? ""}\nMulai ${formatIDR(p.priceMonthly)}/bulan.\nInfo lengkap dan pesan di sini: ${link}`;
+            const plans = p.pricingPlans.length
+              ? p.pricingPlans.map((pl) => ({ label: pl.label || `${pl.months} bulan`, price: pl.price }))
+              : [{ label: "Bulanan", price: p.priceMonthly }];
             return (
-              <Card key={p.id} className="gap-0 overflow-hidden p-0">
-                <div className="relative aspect-[16/9] bg-muted">
-                  {p.imageUrl && (
-                    <Image
-                      src={p.imageUrl}
-                      alt={p.name}
-                      fill
-                      sizes="(min-width: 1280px) 420px, (min-width: 640px) 45vw, 100vw"
-                      className="object-cover"
-                    />
-                  )}
-                  {p.status === "coming_soon" && (
-                    <Badge className="absolute top-3 left-3 gap-1 bg-navy text-cream hover:bg-navy">
-                      <Clock className="size-3" /> Segera hadir
-                    </Badge>
-                  )}
+              <li key={p.id} className="grid gap-5 border-t border-border bg-card p-5 first:border-t-0 md:grid-cols-[168px_minmax(0,1fr)_auto]">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted md:aspect-auto md:h-[126px]">
+                  {p.imageUrl && <Image src={p.imageUrl} alt="" fill sizes="168px" className="object-cover" />}
                 </div>
-                <div className="grid gap-4 p-5">
-                  <div>
-                    <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{p.category}</p>
-                    <h3 className="text-lg font-extrabold text-navy">{p.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <h2 className="text-[1.0625rem] font-semibold text-navy">{p.name}</h2>
+                    {p.status === "coming_soon" && <StatusBadge tone="navy">Segera hadir</StatusBadge>}
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-xl bg-muted/70 p-3">
-                      <p className="text-xs text-muted-foreground">Harga / bulan</p>
-                      <p className="font-extrabold text-navy tabular-nums">{formatIDR(p.priceMonthly)}</p>
-                    </div>
-                    <div className="rounded-xl bg-success/10 p-3">
-                      <p className="text-xs text-success">Komisimu / bulan</p>
-                      <p className="font-extrabold text-success tabular-nums">{formatIDR(p.commission)}</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <CopyButton value={caption} label="Salin teks promosi" successMessage="Teks promosi disalin" />
-                    <Button asChild variant="outline" size="sm">
-                      <a href={link} target="_blank" rel="noreferrer">
-                        <ExternalLink /> Halaman produk
-                      </a>
-                    </Button>
-                  </div>
+                  <p className="text-[0.8125rem] text-muted-foreground">{p.categoryName ?? "Tanpa kategori"}</p>
+                  {p.tagline && <p className="mt-1.5 text-[0.9375rem] text-navy/80">{p.tagline}</p>}
+                  <table className="mt-3 w-full max-w-md text-[0.9375rem]">
+                    <thead>
+                      <tr className="text-left text-[0.8125rem] text-muted-foreground">
+                        <th className="pb-1 font-medium">Paket</th>
+                        <th className="pb-1 text-right font-medium">Harga</th>
+                        <th className="pb-1 text-right font-medium">Komisimu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {plans.map((pl) => (
+                        <tr key={pl.label} className="border-t border-rule">
+                          <td className="py-1.5">{pl.label}</td>
+                          <td className="py-1.5 text-right tabular-nums">{formatIDR(pl.price)}</td>
+                          <td className="py-1.5 text-right font-semibold tabular-nums text-positive">
+                            {formatIDR(Math.floor((pl.price * pct) / 100))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              </Card>
+                <div className="flex flex-row gap-2 md:flex-col md:items-stretch">
+                  <CopyButton value={link} label="Salin link jual" successMessage="Link jual disalin" variant="default" />
+                  <CopyButton value={caption} label="Salin teks promosi" successMessage="Teks promosi disalin" />
+                  <Button asChild variant="outline" size="sm">
+                    <a href={pageLink} target="_blank" rel="noreferrer">
+                      <ExternalLink /> Halaman produk
+                    </a>
+                  </Button>
+                </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
     </>
   );

@@ -20,7 +20,7 @@ export default function RegisterPage(props: PageProps<"/daftar">) {
 }
 
 async function RegisterContent({ searchParams }: { searchParams: PageProps<"/daftar">["searchParams"] }) {
-  const { ref } = await searchParams;
+  const { ref, nama } = await searchParams;
   const fromQuery = Array.isArray(ref) ? ref[0] : ref;
   const fromCookie = (await cookies()).get(REF_COOKIE)?.value;
   const code = (fromQuery ?? fromCookie)?.trim().toUpperCase();
@@ -29,6 +29,7 @@ async function RegisterContent({ searchParams }: { searchParams: PageProps<"/daf
   return (
     <RegisterForm
       defaultReferral={code}
+      defaultName={Array.isArray(nama) ? nama[0] : nama}
       sponsorName={sponsor?.ok ? sponsor.name : undefined}
       googleEnabled={isGoogleConfigured()}
     />

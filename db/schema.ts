@@ -192,18 +192,22 @@ export const agents = pgTable(
 export const PRODUCT_STATUSES = ["draft", "coming_soon", "active", "archived"] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
-export const products = pgTable("products", {
+export type PricingPlan = {
+  /** Lama langganan. */
+  months: number;
+  /** Total yang dibayar pelanggan untuk lama tersebut (Rupiah). */
+  price: number;
+  /** Nama paket, mis. "Tahunan". Kosong = otomatis dari lama langganan. */
+  label?: string;
+};
+export type ProductSpec = { label: string; value: string };
+export type ProductFaq = { q: string; a: string };
+
+export const categories = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
-  slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
-  tagline: text("tagline"),
+  slug: text("slug").notNull().unique(),
   description: text("description"),
-  category: text("category").notNull().default("Bisnis"),
-  /** Harga normal ke pelanggan per bulan (Rupiah). */
-  priceMonthly: bigint("price_monthly", { mode: "number" }).notNull().default(0),
-  imageUrl: text("image_url"),
-  features: jsonb("features").$type<string[]>().notNull().default([]),
-  status: text("status").$type<ProductStatus>().notNull().default("coming_soon"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -211,6 +215,50 @@ export const products = pgTable("products", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export const products = pgTable(
+  "products",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull().unique(),
+    /** Kode produk internal. */
+    sku: text("sku").unique(),
+    name: text("name").notNull(),
+    tagline: text("tagline"),
+    description: text("description"),
+    categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
+    /** Harga normal ke pelanggan per bulan (Rupiah). Dasar paket otomatis. */
+    priceMonthly: bigint("price_monthly", { mode: "number" }).notNull().default(0),
+    /** Pilihan lama langganan beserta harganya. Kosong = hanya bulanan. */
+    pricingPlans: jsonb("pricing_plans").$type<PricingPlan[]>().notNull().default([]),
+    /** Gambar utama (sampul). */
+    imageUrl: text("image_url"),
+    /** Gambar tambahan untuk galeri produk. */
+    gallery: jsonb("gallery").$type<string[]>().notNull().default([]),
+    features: jsonb("features").$type<string[]>().notNull().default([]),
+    specs: jsonb("specs").$type<ProductSpec[]>().notNull().default([]),
+    faqs: jsonb("faqs").$type<ProductFaq[]>().notNull().default([]),
+    /** Label singkat di daftar produk, mis. "Terlaris". */
+    badge: text("badge"),
+    featured: boolean("featured").notNull().default(false),
+    /** Untuk status "segera hadir", mis. "Kuartal 1 2027". */
+    releaseNote: text("release_note"),
+    demoUrl: text("demo_url"),
+    seoTitle: text("seo_title"),
+    seoDescription: text("seo_description"),
+    status: text("status").$type<ProductStatus>().notNull().default("coming_soon"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("products_status_idx").on(t.status),
+    index("products_category_idx").on(t.categoryId),
+  ],
+);
 
 export const ORDER_STATUSES = ["pending", "paid", "cancelled", "refunded"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
@@ -332,6 +380,7 @@ export type User = typeof user.$inferSelect;
 export type Agent = typeof agents.$inferSelect;
 export type AgentLevel = typeof agentLevels.$inferSelect;
 export type Product = typeof products.$inferSelect;
+export type Category = typeof categories.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type Withdrawal = typeof withdrawals.$inferSelect;
 export type WalletEntry = typeof walletEntries.$inferSelect;

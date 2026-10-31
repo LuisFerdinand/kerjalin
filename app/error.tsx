@@ -25,7 +25,7 @@ export default function GlobalError({
         <h1 className="text-2xl font-extrabold text-navy">Terjadi kesalahan</h1>
         <p className="mt-2 max-w-md text-muted-foreground">
           Maaf, ada masalah saat memuat halaman ini. Coba lagi, atau kembali ke beranda.
-          {error.digest && <span className="mt-1 block text-xs">Kode: {error.digest}</span>}
+          {error.digest && <span className="mt-1 block text-[0.9375rem]">Kode: {error.digest}</span>}
         </p>
       </div>
       <div className="flex gap-3">

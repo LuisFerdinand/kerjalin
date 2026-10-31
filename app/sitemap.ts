@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/config";
-import { getPublicProducts } from "@/lib/queries/public";
+import { listPublicProducts } from "@/lib/queries/catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await getPublicProducts();
+  const { items: products } = await listPublicProducts({ pageSize: 500 });
   const base = siteConfig.url;
 
   return [

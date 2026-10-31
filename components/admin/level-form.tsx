@@ -42,7 +42,7 @@ export type LevelFormData = {
   isDefault: boolean;
 };
 
-const swatches = ["#F5A524", "#0B78F0", "#12A06B", "#7C5CFA", "#E5484D", "#082052"];
+const swatches = ["#B36B00", "#082052", "#6B7A9E", "#247B50", "#C4242A", "#0F766E"];
 
 export function LevelFormDialog({
   level,
@@ -55,7 +55,7 @@ export function LevelFormDialog({
   nextRank: number;
   trigger: ReactNode;
 }) {
-  const [color, setColor] = useState(level?.color ?? "#0B78F0");
+  const [color, setColor] = useState(level?.color ?? "#082052");
   const options = allLevels.filter((l) => l.id !== level?.id);
 
   return (
@@ -70,7 +70,7 @@ export function LevelFormDialog({
       {(state) => (
         <>
           {level?.id && <input type="hidden" name="id" value={level.id} />}
-          <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_120px]">
             <FormField label="Nama level" name="name" state={state}>
               <Input id="name" name="name" defaultValue={level?.name} placeholder="mis. Agen Utama" required className="h-10" />
             </FormField>
@@ -91,7 +91,7 @@ export function LevelFormDialog({
                 name="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="size-10 cursor-pointer rounded-lg border bg-background p-1"
+                className="size-10 cursor-pointer rounded-lg border border-input bg-card p-1"
               />
               {swatches.map((s) => (
                 <button

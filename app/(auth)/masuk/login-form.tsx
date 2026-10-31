@@ -49,7 +49,7 @@ export function LoginForm({
   return (
     <div className="grid gap-6">
       <div className="grid gap-1.5">
-        <h1 className="text-3xl font-extrabold text-navy">Selamat datang kembali</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold text-navy">Selamat datang kembali</h1>
         <p className="text-muted-foreground">Masuk untuk membuka dashboard Kerjalin kamu.</p>
       </div>
 
@@ -83,19 +83,19 @@ export function LoginForm({
           />
         </FormField>
         {error && (
-          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-[0.9375rem] text-destructive">
             {error}
           </p>
         )}
-        <Button type="submit" size="lg" className="h-11 text-sm font-semibold" disabled={loading}>
+        <Button type="submit" size="lg" className="h-11 text-[0.9375rem] font-semibold" disabled={loading}>
           {loading && <Loader2 className="animate-spin" />}
           Masuk
         </Button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[0.9375rem] text-muted-foreground">
         Belum punya akun?{" "}
-        <Link href="/daftar" className="font-semibold text-brand hover:underline">
+        <Link href="/daftar" className="font-semibold text-navy underline underline-offset-2">
           Daftar jadi agen
         </Link>
       </p>

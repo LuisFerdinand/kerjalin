@@ -4,6 +4,7 @@ import { db } from "@/db";
 import {
   agentLevels,
   agents,
+  categories,
   orders,
   products,
   user,
@@ -18,6 +19,25 @@ import { getWalletSummary } from "@/lib/queries/admin";
 
 const num = (v: unknown) => Number(v ?? 0);
 
+/** Produk dengan penjualan lunas terbanyak oleh agen ini. */
+export async function getTopProducts(agentId: string, limit = 4) {
+  const rows = await db
+    .select({
+      name: orders.productName,
+      slug: products.slug,
+      imageUrl: products.imageUrl,
+      sold: sql<number>`count(*)::int`,
+      revenue: sql<number>`coalesce(sum(${orders.amount}), 0)::bigint`,
+    })
+    .from(orders)
+    .leftJoin(products, eq(orders.productId, products.id))
+    .where(and(eq(orders.agentId, agentId), eq(orders.status, "paid")))
+    .groupBy(orders.productName, products.slug, products.imageUrl)
+    .orderBy(desc(sql`count(*)`), desc(sql`sum(${orders.amount})`))
+    .limit(limit);
+  return rows.map((r) => ({ ...r, sold: num(r.sold), revenue: num(r.revenue) }));
+}
+
 export async function getAgentOverview(agent: Agent, level: AgentLevel) {
   const wallet = await getWalletSummary(agent.id);
 
@@ -31,6 +51,19 @@ export async function getAgentOverview(agent: Agent, level: AgentLevel) {
         eq(walletEntries.agentId, agent.id),
         inArray(walletEntries.type, ["commission", "override", "reversal", "adjustment"]),
         sql`date_trunc('month', ${walletEntries.createdAt} at time zone 'UTC' at time zone 'Asia/Jakarta') = date_trunc('month', now() at time zone 'Asia/Jakarta')`,
+      ),
+    );
+
+  const [lastMonth] = await db
+    .select({
+      earned: sql<number>`coalesce(sum(${walletEntries.amount}), 0)::bigint`,
+    })
+    .from(walletEntries)
+    .where(
+      and(
+        eq(walletEntries.agentId, agent.id),
+        inArray(walletEntries.type, ["commission", "override", "reversal", "adjustment"]),
+        sql`date_trunc('month', ${walletEntries.createdAt} at time zone 'UTC' at time zone 'Asia/Jakarta') = date_trunc('month', now() at time zone 'Asia/Jakarta') - interval '1 month'`,
       ),
     );
 
@@ -78,6 +111,7 @@ export async function getAgentOverview(agent: Agent, level: AgentLevel) {
   return {
     wallet,
     monthEarned: num(month?.earned),
+    lastMonthEarned: num(lastMonth?.earned),
     daily: series.rows.map((r) => ({
       date: r.date,
       commission: num(r.commission),
@@ -198,10 +232,27 @@ export async function listAgentWithdrawals(agentId: string) {
 
 export async function getAgentCatalog(agent: Agent, level: AgentLevel) {
   const list = await db
-    .select()
+    .select({ product: products, categoryName: categories.name })
     .from(products)
+    .leftJoin(categories, eq(products.categoryId, categories.id))
     .where(inArray(products.status, ["active", "coming_soon"]))
-    .orderBy(asc(products.sortOrder), asc(products.name));
+    .orderBy(desc(products.featured), asc(products.sortOrder), asc(products.name));
   const pct = effectiveCommission(agent, level);
-  return list.map((p) => ({ ...p, commission: Math.floor((p.priceMonthly * pct) / 100) }));
+  return list.map(({ product: p, categoryName }) => ({
+    ...p,
+    categoryName,
+    commission: Math.floor((p.priceMonthly * pct) / 100),
+  }));
+}
+
+/** Nama sponsor (upline langsung). null = langsung di bawah Kerjalin. */
+export async function getSponsorName(agent: Agent) {
+  if (!agent.parentId) return null;
+  const [row] = await db
+    .select({ name: user.name })
+    .from(agents)
+    .innerJoin(user, eq(agents.userId, user.id))
+    .where(eq(agents.id, agent.parentId))
+    .limit(1);
+  return row?.name ?? null;
 }

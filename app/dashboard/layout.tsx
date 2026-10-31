@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function AgentLayout({ children }: LayoutProps<"/dashboard">) {
   return (
     <AppShell
-      title="Portal Agen"
+      variant="agent"
       sidebar={
         <Suspense fallback={<AppSidebar variant="agent" user={null} />}>
           <AgentSidebar />

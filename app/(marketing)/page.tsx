@@ -1,53 +1,71 @@
 import { Suspense } from "react";
-import { AudienceSection } from "@/components/marketing/audience-section";
 import { BenefitStrip } from "@/components/marketing/benefit-strip";
-import { CommissionSection, loadPublicLevels } from "@/components/marketing/commission-section";
+import { CategorySection } from "@/components/marketing/category-section";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { EarningsSimulator } from "@/components/marketing/earnings-simulator";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { Hero } from "@/components/marketing/hero";
 import { HowItWorks } from "@/components/marketing/how-it-works";
+import { LevelTiles, loadPublicLevels, topCommissionOf } from "@/components/marketing/levels-section";
 import { ProductsSection } from "@/components/marketing/products-section";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCatalogFacets, getPublicProducts } from "@/lib/queries/catalog";
+
+/** Komisi tertinggi dipakai di hero dan kartu produk; dibaca dari level agen yang diatur admin. */
+const FALLBACK_TOP_COMMISSION = 50;
 
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <Suspense fallback={<Hero topCommission={FALLBACK_TOP_COMMISSION} />}>
+        <HeroWithLevels />
+      </Suspense>
       <BenefitStrip />
       <Suspense fallback={<SectionSkeleton />}>
-        <ProductsSection />
+        <Storefront />
       </Suspense>
       <HowItWorks />
       <Suspense fallback={<SectionSkeleton />}>
-        <CommissionAndSimulator />
+        <LevelsAndSimulator />
       </Suspense>
-      <AudienceSection />
       <FaqSection />
       <CtaBand />
     </>
   );
 }
 
-async function CommissionAndSimulator() {
+async function HeroWithLevels() {
   const levels = await loadPublicLevels();
+  return <Hero topCommission={topCommissionOf(levels)} />;
+}
+
+async function Storefront() {
+  const [facets, levels] = await Promise.all([getCatalogFacets(), loadPublicLevels()]);
+  const topCommission = topCommissionOf(levels);
   return (
     <>
-      <CommissionSection levels={levels} />
-      <EarningsSimulator levels={levels} />
+      <CategorySection categories={facets.categories} />
+      <ProductsSection topCommission={topCommission} />
+    </>
+  );
+}
+
+async function LevelsAndSimulator() {
+  const [levels, products] = await Promise.all([loadPublicLevels(), getPublicProducts(1)]);
+  const price = products[0]?.priceMonthly ?? 100_000;
+  return (
+    <>
+      <LevelTiles levels={levels} />
+      <EarningsSimulator levels={levels} price={price} />
     </>
   );
 }
 
 function SectionSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-      <Skeleton className="mx-auto h-10 w-80" />
-      <div className="mt-12 grid gap-6 sm:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} className="h-72 rounded-2xl" />
-        ))}
-      </div>
+    <div className="mx-auto w-full max-w-[1240px] px-4 py-16 sm:px-6 lg:px-8">
+      <Skeleton className="h-10 w-80 max-w-full" />
+      <Skeleton className="mt-8 h-72 rounded-2xl" />
     </div>
   );
 }

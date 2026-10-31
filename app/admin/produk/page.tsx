@@ -1,114 +1,165 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { ImageIcon, Package, Pencil, Plus } from "lucide-react";
+import Link from "next/link";
+import { Package, Plus, Search, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ProductStatusBadge } from "@/components/app/badges";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
 import { EmptyState, PageHeader } from "@/components/app/page-header";
-import { DeleteProductButton, ProductFormDialog } from "@/components/admin/product-form";
-import { formatIDR } from "@/lib/format";
-import { listProductsAdmin } from "@/lib/queries/admin";
+import { Pagination } from "@/components/app/pagination";
+import { TabsNav } from "@/components/app/tabs-nav";
+import { ProductsTable } from "@/components/admin/products-table";
+import { PRODUCT_STATUSES } from "@/db/schema";
+import {
+  ADMIN_PRODUCT_SORTS,
+  getProductCountsAdmin,
+  listCategoryOptions,
+  listProductsAdmin,
+  type AdminProductSort,
+} from "@/lib/queries/catalog";
+import { first, pageParam, pickEnum } from "@/lib/search-params";
 import { requireAdmin } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Produk" };
 
-export default async function ProductsAdminPage() {
+export default async function ProductsAdminPage(props: PageProps<"/admin/produk">) {
   await requireAdmin();
-  const items = await listProductsAdmin();
-  const nextOrder = (items.at(-1)?.sortOrder ?? 0) + 1;
+  const sp = await props.searchParams;
+  const q = first(sp.q);
+  const status = pickEnum(sp.status, PRODUCT_STATUSES);
+  const categoryId = first(sp.kategori);
+  const sort = pickEnum(sp.urut, Object.keys(ADMIN_PRODUCT_SORTS) as AdminProductSort[]);
+  const page = pageParam(sp.hal);
 
-  const addButton = (
-    <ProductFormDialog
-      nextOrder={nextOrder}
-      trigger={
-        <Button>
-          <Plus /> Tambah produk
-        </Button>
-      }
-    />
-  );
+  const [result, counts, categories] = await Promise.all([
+    listProductsAdmin({ q, status, categoryId, sort, page }),
+    getProductCountsAdmin(),
+    listCategoryOptions(),
+  ]);
+
+  const tab = (label: string, value: (typeof PRODUCT_STATUSES)[number] | undefined, count: number) => {
+    const sp2 = new URLSearchParams();
+    if (value) sp2.set("status", value);
+    if (q) sp2.set("q", q);
+    if (categoryId) sp2.set("kategori", categoryId);
+    if (sort) sp2.set("urut", sort);
+    const qs = sp2.toString();
+    return { label, count, active: status === value, href: qs ? `/admin/produk?${qs}` : "/admin/produk" };
+  };
+
+  const hasFilters = Boolean(q || categoryId || status);
 
   return (
     <>
       <PageHeader
         title="Produk"
-        description="Kelola layanan SaaS yang dijual lewat agen. Produk berstatus Aktif atau Segera hadir tampil di situs publik."
-        actions={addButton}
+        description="Kelola katalog layanan SaaS: harga, paket, gambar, dan status tampil di situs."
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href="/admin/kategori">
+                <Tags /> Kategori
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/admin/produk/baru">
+                <Plus /> Produk baru
+              </Link>
+            </Button>
+          </>
+        }
       />
 
-      {items.length === 0 ? (
+      <TabsNav
+        label="Status produk"
+        items={[
+          tab("Semua", undefined, counts.all),
+          tab("Aktif", "active", counts.active),
+          tab("Segera hadir", "coming_soon", counts.coming_soon),
+          tab("Draf", "draft", counts.draft),
+          tab("Diarsipkan", "archived", counts.archived),
+        ]}
+      />
+
+      <form action="/admin/produk" className="flex flex-col gap-2 py-4 sm:flex-row sm:items-center">
+        {status && <input type="hidden" name="status" value={status} />}
+        <div className="relative flex-1 sm:max-w-sm">
+          <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-faint" />
+          <Input name="q" defaultValue={q} placeholder="Cari nama, SKU, atau slug" className="pl-9" aria-label="Cari produk" />
+        </div>
+        <NativeSelect name="kategori" defaultValue={categoryId ?? ""} className="sm:w-48" aria-label="Kategori">
+          <option value="">Semua kategori</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </NativeSelect>
+        <NativeSelect name="urut" defaultValue={sort ?? "urutan"} className="sm:w-52" aria-label="Urutkan">
+          {Object.entries(ADMIN_PRODUCT_SORTS).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </NativeSelect>
+        <Button type="submit" variant="outline">
+          Terapkan
+        </Button>
+        {hasFilters && (
+          <Button asChild variant="ghost">
+            <Link href="/admin/produk">Reset</Link>
+          </Button>
+        )}
+        <p className="text-[0.8125rem] text-muted-foreground sm:ml-auto">{result.total} produk</p>
+      </form>
+
+      {result.rows.length === 0 ? (
         <EmptyState
           icon={Package}
-          title="Belum ada produk"
-          description="Tambahkan produk SaaS pertama, mis. Laundry SaaS."
-          action={addButton}
+          title={hasFilters ? "Tidak ada produk yang cocok" : "Belum ada produk"}
+          description={hasFilters ? "Coba ubah kata kunci atau filter." : "Tambahkan produk SaaS pertama, mis. Laundry SaaS."}
+          action={
+            !hasFilters && (
+              <Button asChild>
+                <Link href="/admin/produk/baru">
+                  <Plus /> Produk baru
+                </Link>
+              </Button>
+            )
+          }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {items.map((p) => (
-            <Card key={p.id} className="gap-0 overflow-hidden p-0">
-              <div className="relative aspect-[16/9] bg-muted">
-                {p.imageUrl ? (
-                  <Image
-                    src={p.imageUrl}
-                    alt={p.name}
-                    fill
-                    sizes="(min-width: 1280px) 420px, (min-width: 640px) 45vw, 100vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-muted-foreground">
-                    <ImageIcon className="size-8" />
-                  </div>
-                )}
-                <div className="absolute top-3 left-3">
-                  <ProductStatusBadge status={p.status} />
-                </div>
-              </div>
-              <div className="grid flex-1 gap-3 p-5">
-                <div>
-                  <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{p.category}</p>
-                  <h3 className="text-lg font-extrabold text-navy">{p.name}</h3>
-                  {p.tagline && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>}
-                </div>
-                <div className="flex items-end justify-between border-t pt-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{p.features.length} fitur · /{p.slug}</p>
-                    <p className="text-lg font-extrabold text-navy tabular-nums">
-                      {formatIDR(p.priceMonthly)}
-                      <span className="text-xs font-medium text-muted-foreground"> /bulan</span>
-                    </p>
-                  </div>
-                  <div className="flex gap-1">
-                    <ProductFormDialog
-                      product={{
-                        id: p.id,
-                        name: p.name,
-                        slug: p.slug,
-                        category: p.category,
-                        tagline: p.tagline,
-                        description: p.description,
-                        priceMonthly: p.priceMonthly,
-                        features: p.features,
-                        status: p.status,
-                        sortOrder: p.sortOrder,
-                        imageUrl: p.imageUrl,
-                      }}
-                      nextOrder={nextOrder}
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          <Pencil /> Ubah
-                        </Button>
-                      }
-                    />
-                    <DeleteProductButton id={p.id} name={p.name} />
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
+        <div className="overflow-hidden rounded-xl border border-border">
+          <ProductsTable
+            rows={result.rows.map((p) => ({
+              id: p.id,
+              name: p.name,
+              slug: p.slug,
+              sku: p.sku,
+              imageUrl: p.imageUrl,
+              categoryName: p.categoryName,
+              status: p.status,
+              priceMonthly: p.priceMonthly,
+              planCount: p.pricingPlans.length,
+              sold: p.sold,
+              revenue: p.revenue,
+              updatedAt: p.updatedAt.toISOString(),
+              featured: p.featured,
+              badge: p.badge,
+            }))}
+          />
         </div>
       )}
+
+      <div className="pt-4">
+        <Pagination
+          page={result.page}
+          pageCount={result.pageCount}
+          total={result.total}
+          basePath="/admin/produk"
+          pageKey="hal"
+          params={{ q, status, kategori: categoryId, urut: sort }}
+        />
+      </div>
     </>
   );
 }

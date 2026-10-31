@@ -1,48 +1,9 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { agentLevels, agents, products, user } from "@/db/schema";
+import { agentLevels, agents, orders, products, user } from "@/db/schema";
 import { effectiveSlots } from "@/lib/mlm";
-
-/** Produk yang tampil di situs publik (aktif & segera hadir). */
-export async function getPublicProducts() {
-  "use cache";
-  cacheTag("products");
-  try {
-    cacheLife("hours");
-    return await db
-      .select()
-      .from(products)
-      .where(inArray(products.status, ["active", "coming_soon"]))
-      .orderBy(asc(products.sortOrder), asc(products.name));
-  } catch (error) {
-    // Jangan menyimpan hasil kosong terlalu lama bila database belum siap.
-    console.error("[getPublicProducts]", error);
-    cacheLife("seconds");
-    return [];
-  }
-}
-
-export async function getProductBySlug(slug: string) {
-  "use cache";
-  cacheTag("products");
-  try {
-    cacheLife("hours");
-    const [row] = await db
-      .select()
-      .from(products)
-      .where(
-        and(eq(products.slug, slug), inArray(products.status, ["active", "coming_soon"])),
-      )
-      .limit(1);
-    return row ?? null;
-  } catch (error) {
-    console.error("[getProductBySlug]", error);
-    cacheLife("seconds");
-    return null;
-  }
-}
 
 /** Level agen untuk ditampilkan di skema komisi publik. */
 export async function getPublicLevels() {
@@ -106,4 +67,40 @@ export async function lookupSponsor(code: string | null | undefined): Promise<Sp
   }
 
   return { ok: true, name: row.name, levelName: row.level.name, code: clean };
+}
+
+/** Agen penjual dari kode referral, untuk atribusi pesanan. Hanya agen aktif yang dikembalikan. */
+export async function lookupSeller(code: string | null | undefined) {
+  const clean = code?.trim().toUpperCase();
+  if (!clean) return null;
+  const [row] = await db
+    .select({ id: agents.id, code: agents.referralCode, name: user.name, status: agents.status })
+    .from(agents)
+    .innerJoin(user, eq(agents.userId, user.id))
+    .where(eq(agents.referralCode, clean))
+    .limit(1);
+  return row && row.status === "active" ? row : null;
+}
+
+/** Pesanan untuk halaman konfirmasi. Hanya data yang aman dilihat pemegang kode pesanan. */
+export async function getOrderByCode(code: string) {
+  const [row] = await db
+    .select({
+      code: orders.code,
+      productName: orders.productName,
+      productSlug: products.slug,
+      months: orders.months,
+      amount: orders.amount,
+      status: orders.status,
+      createdAt: orders.createdAt,
+      customerName: orders.customerName,
+      sellerName: user.name,
+    })
+    .from(orders)
+    .leftJoin(products, eq(orders.productId, products.id))
+    .leftJoin(agents, eq(orders.agentId, agents.id))
+    .leftJoin(user, eq(agents.userId, user.id))
+    .where(eq(orders.code, code.trim().toUpperCase()))
+    .limit(1);
+  return row ?? null;
 }

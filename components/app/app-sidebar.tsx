@@ -1,21 +1,9 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Banknote,
-  Boxes,
-  Layers,
-  LayoutDashboard,
-  Network,
-  Package,
-  ReceiptText,
-  UserCog,
-  Users,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -25,110 +13,107 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
-  SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Logo } from "@/components/brand/logo";
-import { UserMenu, type UserMenuUser } from "./user-menu";
+import { cn } from "@/lib/utils";
+import { NAV, isActive, type NavItem, type Variant } from "./nav";
+import { SignOutButton, UserMenu, type UserMenuUser } from "./user-menu";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; badgeKey?: string; exact?: boolean };
-type NavGroup = { label: string; items: NavItem[] };
+/** Ingat pilihan ciut/terbuka dari kunjungan sebelumnya (cookie ditulis oleh SidebarProvider). */
+function SidebarMemory() {
+  const { setOpen } = useSidebar();
+  useEffect(() => {
+    const saved = document.cookie.split("; ").find((c) => c.startsWith("sidebar_state="));
+    if (saved?.endsWith("=false")) setOpen(false);
+    // Hanya saat pertama dimuat.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+}
 
-const NAV: Record<"admin" | "agent", NavGroup[]> = {
-  admin: [
-    {
-      label: "Utama",
-      items: [
-        { href: "/admin", label: "Ringkasan", icon: LayoutDashboard, exact: true },
-        { href: "/admin/pohon", label: "Pohon Jaringan", icon: Network },
-        { href: "/admin/agen", label: "Agen", icon: Users, badgeKey: "pendingAgents" },
-        { href: "/admin/level", label: "Level & Komisi", icon: Layers },
-      ],
-    },
-    {
-      label: "Penjualan",
-      items: [
-        { href: "/admin/produk", label: "Produk", icon: Package },
-        { href: "/admin/pesanan", label: "Pesanan", icon: ReceiptText, badgeKey: "pendingOrders" },
-        { href: "/admin/penarikan", label: "Penarikan", icon: Banknote, badgeKey: "pendingWithdrawals" },
-      ],
-    },
-  ],
-  agent: [
-    {
-      label: "Utama",
-      items: [
-        { href: "/dashboard", label: "Ringkasan", icon: LayoutDashboard, exact: true },
-        { href: "/dashboard/tim", label: "Tim Saya", icon: Network },
-        { href: "/dashboard/penjualan", label: "Penjualan", icon: ReceiptText },
-      ],
-    },
-    {
-      label: "Keuangan",
-      items: [
-        { href: "/dashboard/komisi", label: "Riwayat Komisi", icon: Wallet },
-        { href: "/dashboard/penarikan", label: "Penarikan", icon: Banknote },
-      ],
-    },
-    {
-      label: "Lainnya",
-      items: [
-        { href: "/dashboard/produk", label: "Katalog Produk", icon: Boxes },
-        { href: "/dashboard/profil", label: "Profil & Rekening", icon: UserCog },
-      ],
-    },
-  ],
-};
+/** Tombol untuk menciutkan dan membuka kembali sidebar. Di versi ciut, tombol ini berada di bawah logo. */
+function CollapseToggle() {
+  const { state, toggleSidebar } = useSidebar();
+  const collapsed = state === "collapsed";
+  return (
+    <button
+      type="button"
+      onClick={toggleSidebar}
+      aria-label={collapsed ? "Buka sidebar" : "Ciutkan sidebar"}
+      title={`${collapsed ? "Buka" : "Ciutkan"} sidebar (Ctrl+B)`}
+      className="hidden size-8 shrink-0 place-items-center rounded-lg bg-white/10 text-white outline-none transition-colors hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/60 md:grid"
+    >
+      <ChevronLeft className={cn("size-4 transition-transform duration-200", collapsed && "rotate-180")} aria-hidden />
+    </button>
+  );
+}
 
-function NavGroups({
-  variant,
-  badges,
-  pathname,
-}: {
-  variant: "admin" | "agent";
-  badges: Record<string, number>;
-  pathname: string | null;
-}) {
-  const { isMobile, setOpenMobile } = useSidebar();
+function NavLink({ item, active, count }: { item: NavItem; active: boolean; count: number }) {
+  const { isMobile, state, setOpenMobile } = useSidebar();
+  const Icon = item.icon;
 
+  return (
+    <SidebarMenuItem>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={item.href}
+            aria-current={active ? "page" : undefined}
+            onClick={() => isMobile && setOpenMobile(false)}
+            className={cn(
+              "relative flex h-11 items-center gap-3 rounded-l-2xl pr-3 pl-4 text-[0.9375rem] font-medium text-sidebar-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/60",
+              "hover:bg-white/10 hover:text-white",
+              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
+              active && "nav-tab bg-white font-semibold text-navy hover:bg-white hover:text-navy",
+            )}
+          >
+            <Icon className="size-[18px] shrink-0" strokeWidth={active ? 2.1 : 1.7} aria-hidden />
+            <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
+            {count > 0 && (
+              <>
+                <span
+                  title={`${count} ${item.badgeLabel}`}
+                  className={cn(
+                    "relative z-10 ml-auto rounded-full px-2 py-0.5 text-xs font-bold tabular-nums group-data-[collapsible=icon]:hidden",
+                    active ? "bg-navy text-white" : "bg-white text-navy",
+                  )}
+                >
+                  <span className="sr-only">{item.badgeLabel}: </span>
+                  {count}
+                </span>
+                <span
+                  aria-hidden
+                  className="absolute top-2 right-2.5 hidden size-2.5 rounded-full bg-rose-400 ring-2 ring-sidebar group-data-[collapsible=icon]:block"
+                />
+              </>
+            )}
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side="right" align="center" hidden={state !== "collapsed" || isMobile}>
+          {item.label}
+          {count > 0 ? ` · ${count}` : ""}
+        </TooltipContent>
+      </Tooltip>
+    </SidebarMenuItem>
+  );
+}
+
+function NavGroups({ variant, badges, pathname }: { variant: Variant; badges: Record<string, number>; pathname: string | null }) {
   return (
     <>
       {NAV[variant].map((group) => (
-        <SidebarGroup key={group.label}>
-          <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+        <SidebarGroup key={group.label} className="py-2 pr-0 pl-3 group-data-[collapsible=icon]:pl-2">
+          <SidebarGroupLabel className="h-6 px-2 text-[0.6875rem] font-semibold tracking-[0.08em] text-white/45 uppercase">
+            {group.label}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {group.items.map((item) => {
-                const active =
-                  pathname !== null &&
-                  (item.exact
-                    ? pathname === item.href
-                    : pathname === item.href || pathname.startsWith(`${item.href}/`));
-                const count = item.badgeKey ? badges[item.badgeKey] : 0;
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      tooltip={item.label}
-                      className="h-10 data-[active=true]:bg-brand data-[active=true]:text-white data-[active=true]:shadow-md data-[active=true]:shadow-brand/30"
-                    >
-                      <Link href={item.href} onClick={() => isMobile && setOpenMobile(false)}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                    {count > 0 && (
-                      <SidebarMenuBadge className="bg-warning text-[0.65rem] font-bold text-white">
-                        {count}
-                      </SidebarMenuBadge>
-                    )}
-                  </SidebarMenuItem>
-                );
-              })}
+            <SidebarMenu className="gap-1">
+              {group.items.map((item) => (
+                <NavLink key={item.href} item={item} active={isActive(item, pathname)} count={item.badgeKey ? (badges[item.badgeKey] ?? 0) : 0} />
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -138,7 +123,7 @@ function NavGroups({
 }
 
 /** usePathname() hanya tersedia saat runtime, jadi dibungkus Suspense agar shell tetap bisa di-prerender. */
-function ActiveNavGroups(props: { variant: "admin" | "agent"; badges: Record<string, number> }) {
+function ActiveNavGroups(props: { variant: Variant; badges: Record<string, number> }) {
   const pathname = usePathname();
   return <NavGroups {...props} pathname={pathname} />;
 }
@@ -148,35 +133,46 @@ export function AppSidebar({
   user,
   badges = {},
 }: {
-  variant: "admin" | "agent";
+  variant: Variant;
   user: UserMenuUser | null;
   badges?: Record<string, number>;
 }) {
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
-        <Link
-          href={variant === "admin" ? "/admin" : "/dashboard"}
-          aria-label="Kerjalin"
-          className="flex items-center gap-2.5 overflow-hidden px-1 group-data-[collapsible=icon]:px-0"
-        >
-          <Logo tone="light" markClassName="size-8" className="[&>span:last-child]:group-data-[collapsible=icon]:hidden" />
-        </Link>
-        <p className="px-1 text-[0.65rem] font-semibold tracking-[0.2em] text-cream/50 uppercase group-data-[collapsible=icon]:hidden">
-          {variant === "admin" ? "Panel Admin" : "Portal Agen"}
-        </p>
+    <Sidebar
+      variant="sidebar"
+      collapsible="icon"
+      className="z-30! border-r-0! [&_[data-sidebar=sidebar]]:bg-[linear-gradient(180deg,#0c2f7a_0%,#082052_42%,#061a45_100%)]"
+    >
+      <SidebarMemory />
+
+      <SidebarHeader className="px-5 pt-5 pb-2 group-data-[collapsible=icon]:px-2">
+        <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-3">
+          <Link
+            href={variant === "admin" ? "/admin" : "/dashboard"}
+            aria-label="Kerjalin"
+            className="flex items-center gap-2.5 overflow-hidden group-data-[collapsible=icon]:justify-center"
+          >
+            <Logo
+              tone="light"
+              markClassName="size-9 group-data-[collapsible=icon]:size-8"
+              className="[&>span:last-child]:group-data-[collapsible=icon]:hidden"
+            />
+          </Link>
+          <CollapseToggle />
+        </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <UserMenu user={user} variant={variant} />
+
+      <SidebarContent className="mt-2 gap-0 overflow-x-hidden">
         <Suspense fallback={<NavGroups variant={variant} badges={badges} pathname={null} />}>
           <ActiveNavGroups variant={variant} badges={badges} />
         </Suspense>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
-        <UserMenu user={user} variant={variant} />
+      <SidebarFooter className="border-t border-white/10 p-3 group-data-[collapsible=icon]:px-2">
+        <SignOutButton />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

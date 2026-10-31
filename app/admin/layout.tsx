@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <AppShell
-      title="Panel Admin"
+      variant="admin"
       sidebar={
         <Suspense fallback={<AppSidebar variant="admin" user={null} />}>
           <AdminSidebar />

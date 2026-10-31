@@ -126,19 +126,16 @@ export function NetworkTree({ nodes, levels }: { nodes: TreeNodeData[]; levels: 
                   onClick={() => setSelectedId(n.id)}
                   aria-pressed={isSelected}
                   className={cn(
-                    "group flex min-w-0 flex-1 items-center gap-3 rounded-xl border bg-card px-3 py-2 text-left transition-all hover:border-brand/40 hover:shadow-sm",
-                    isSelected && "border-brand bg-brand-soft ring-2 ring-brand/25",
-                    matchIds.has(n.id) && !isSelected && "border-warning/60 bg-warning/5",
+                    "group flex min-w-0 flex-1 items-center gap-3 rounded-lg border border-border bg-card px-3 py-2 text-left transition-colors hover:border-navy/40",
+                    isSelected && "border-navy bg-brand-soft ring-1 ring-navy",
+                    matchIds.has(n.id) && !isSelected && "border-warning bg-[#fff4d6]",
                     n.status === "suspended" && "opacity-60",
                   )}
                 >
                   <span className="relative">
                     <Avatar className="size-9">
                       {n.image && <AvatarImage src={n.image} alt="" />}
-                      <AvatarFallback
-                        className="text-xs font-bold text-white"
-                        style={{ backgroundColor: n.levelColor }}
-                      >
+                      <AvatarFallback className="bg-brand-soft text-xs font-semibold text-navy">
                         {initials(n.name)}
                       </AvatarFallback>
                     </Avatar>
@@ -154,7 +151,7 @@ export function NetworkTree({ nodes, levels }: { nodes: TreeNodeData[]; levels: 
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                      <span className="truncate text-sm font-bold text-navy">{n.name}</span>
+                      <span className="truncate text-sm font-semibold text-navy">{n.name}</span>
                       <LevelBadge name={n.levelName} color={n.levelColor} />
                     </span>
                     <span className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
@@ -217,13 +214,13 @@ export function NetworkTree({ nodes, levels }: { nodes: TreeNodeData[]; levels: 
         </div>
 
         {/* Akar: Kerjalin */}
-        <div className="flex items-center gap-3 rounded-xl bg-navy p-3.5 text-white">
+        <div className="flex items-center gap-3 rounded-lg bg-navy p-3.5 text-white">
           <span className="flex size-10 items-center justify-center rounded-xl bg-white/10">
-            <Crown className="size-5 text-warning" />
+            <Crown className="size-5 text-white" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-extrabold">Kerjalin · Super Admin</p>
-            <p className="text-xs text-cream/70">
+            <p className="font-semibold">Kerjalin · Super Admin</p>
+            <p className="text-[0.8125rem] text-white/80">
               {roots.length} agen langsung · {nodes.length} agen di seluruh jaringan
             </p>
           </div>
@@ -257,7 +254,7 @@ export function NetworkTree({ nodes, levels }: { nodes: TreeNodeData[]; levels: 
       {/* Panel detail — desktop */}
       <div className="sticky top-20 hidden xl:block">
         {details ?? (
-          <Card className="items-center gap-2 border-dashed p-8 text-center text-muted-foreground shadow-none">
+          <Card className="items-center gap-2 border-dashed p-8 text-center text-muted-foreground">
             <Network className="size-8" />
             <p className="text-sm font-medium">Pilih agen di pohon untuk melihat detail dan mengelola posisinya.</p>
           </Card>
@@ -319,16 +316,16 @@ function NodeDetails({
   }
 
   return (
-    <Card className="gap-5 p-5 md:shadow-md">
+    <Card className="gap-5 p-5">
       <div className="flex items-start gap-3">
         <Avatar className="size-12">
           {node.image && <AvatarImage src={node.image} alt="" />}
-          <AvatarFallback className="font-bold text-white" style={{ backgroundColor: node.levelColor }}>
+          <AvatarFallback className="bg-navy font-semibold text-white">
             {initials(node.name)}
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-extrabold text-navy">{node.name}</h3>
+          <h3 className="truncate text-lg font-semibold text-navy">{node.name}</h3>
           <p className="truncate text-sm text-muted-foreground">{node.email}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <LevelBadge name={node.levelName} color={node.levelColor} />
@@ -347,7 +344,7 @@ function NodeDetails({
           <button
             type="button"
             onClick={copyCode}
-            className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-navy hover:bg-accent"
+            className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-0.5 text-[0.8125rem] font-semibold text-navy hover:bg-accent"
           >
             {node.referralCode} <Copy className="size-3" />
           </button>
@@ -358,7 +355,7 @@ function NodeDetails({
               href={`https://wa.me/${node.phone.replace(/^0/, "62")}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 font-medium text-brand hover:underline"
+              className="inline-flex items-center gap-1.5 font-medium text-navy underline underline-offset-2"
             >
               <Phone className="size-3.5" /> {node.phone}
             </a>
@@ -366,7 +363,7 @@ function NodeDetails({
         )}
       </dl>
 
-      <div className="grid gap-2 rounded-xl bg-muted/70 p-3.5">
+      <div className="grid gap-2 rounded-lg bg-muted/70 p-3.5">
         <div className="flex items-center justify-between text-sm">
           <span className="font-semibold text-navy">Slot downline langsung</span>
           <span className="font-bold text-navy tabular-nums">
@@ -380,13 +377,13 @@ function NodeDetails({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl border p-3">
+        <div className="rounded-lg border border-border p-3">
           <p className="text-xs text-muted-foreground">Total komisi</p>
-          <p className="mt-0.5 text-sm font-extrabold text-navy tabular-nums">{formatIDR(node.earned)}</p>
+          <p className="mt-0.5 text-sm font-semibold text-navy tabular-nums">{formatIDR(node.earned)}</p>
         </div>
-        <div className="rounded-xl border p-3">
+        <div className="rounded-lg border border-border p-3">
           <p className="text-xs text-muted-foreground">Saldo</p>
-          <p className="mt-0.5 text-sm font-extrabold text-navy tabular-nums">{formatIDR(node.balance)}</p>
+          <p className="mt-0.5 text-sm font-semibold text-navy tabular-nums">{formatIDR(node.balance)}</p>
         </div>
       </div>
 

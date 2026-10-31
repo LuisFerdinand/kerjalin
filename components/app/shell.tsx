@@ -1,28 +1,30 @@
 import type { ReactNode } from "react";
-import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AppTopbar } from "./topbar";
 
+/**
+ * Sidebar navy di kiri, isi halaman putih di kanan. Menu aktif berupa tab putih yang menyatu dengan isi.
+ * Sidebar bisa diciutkan menjadi deretan ikon (tombol di tepinya, atau Ctrl+B).
+ */
 export function AppShell({
-  title,
+  variant,
   sidebar,
   children,
 }: {
-  title: string;
+  variant: "admin" | "agent";
   sidebar: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-white">
       {sidebar}
-      <SidebarInset className="min-w-0 bg-muted/40">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="h-5" />
-          <span className="text-sm font-semibold text-navy">{title}</span>
-        </header>
-        <div className="mx-auto w-full max-w-[1400px] flex-1 p-4 md:p-6 lg:p-8">{children}</div>
-      </SidebarInset>
+      <div className="flex min-h-svh min-w-0 flex-1 flex-col bg-white">
+        <AppTopbar variant={variant} />
+        <main className="flex-1">
+          <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</div>
+        </main>
+      </div>
     </SidebarProvider>
   );
 }
@@ -34,11 +36,7 @@ export function PageSkeleton() {
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-4 w-80 max-w-full" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 rounded-xl" />
-        ))}
-      </div>
+      <Skeleton className="h-24 rounded-xl" />
       <Skeleton className="h-80 rounded-xl" />
     </div>
   );

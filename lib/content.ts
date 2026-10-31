@@ -1,115 +1,65 @@
-import {
-  BadgeCheck,
-  Banknote,
-  Boxes,
-  GraduationCap,
-  HeartHandshake,
-  Laptop,
-  Network,
-  ShoppingBag,
-  Store,
-  UserPlus,
-  Wallet,
-  type LucideIcon,
-} from "lucide-react";
-
 export const navLinks = [
-  { href: "#produk", label: "Produk" },
-  { href: "#cara-kerja", label: "Cara Kerja" },
-  { href: "#komisi", label: "Komisi" },
-  { href: "#simulasi", label: "Simulasi" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/", label: "Beranda" },
+  { href: "/produk", label: "Produk" },
+  { href: "/#cara-kerja", label: "Cara Kerja" },
+  { href: "/#keuntungan", label: "Keuntungan" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
-export const benefits: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: BadgeCheck, title: "Tanpa modal besar", text: "Daftar gratis, langsung bisa mulai jual" },
-  { icon: Banknote, title: "Komisi menarik", text: "Dapat komisi dari setiap langganan aktif" },
-  { icon: Network, title: "Bangun tim", text: "Rekrut agen & dapat bonus tim" },
-  { icon: Wallet, title: "Cairkan ke rekening", text: "Ajukan penarikan kapan pun saldo siap" },
-];
-
-export const steps: { icon: LucideIcon; title: string; text: string }[] = [
+/** Tiga langkah dari daftar sampai komisi masuk. */
+export const steps = [
   {
-    icon: UserPlus,
-    title: "Daftar gratis",
-    text: "Buat akun agen dalam hitungan menit. Cukup email atau akun Google, tanpa biaya pendaftaran.",
+    title: "Daftar Gratis",
+    text: "Buat akun dalam hitungan menit. Admin menyetujui akunmu, lalu dashboard agen langsung terbuka.",
   },
   {
-    icon: Boxes,
-    title: "Pilih layanan",
-    text: "Pilih layanan SaaS yang ingin kamu tawarkan ke pelaku usaha di sekitarmu, lengkap dengan harga dan komisinya.",
+    title: "Pilih Produk",
+    text: "Pilih produk yang cocok dengan teman dan pelangganmu, lalu salin link referral milikmu.",
   },
   {
-    icon: HeartHandshake,
-    title: "Jual & dapat komisi",
-    text: "Setiap pelanggan yang berlangganan lewat kamu menghasilkan komisi. Ajak teman jadi agen untuk dapat bonus tim.",
-  },
-];
-
-export const audiences: { icon: LucideIcon; title: string; text: string; image: string }[] = [
-  {
-    icon: GraduationCap,
-    title: "Mahasiswa & fresh graduate",
-    text: "Cari penghasilan sampingan tanpa mengganggu jadwal kuliah atau kerja.",
-    image: "/images/hero-team.jpg",
-  },
-  {
-    icon: HeartHandshake,
-    title: "Ibu rumah tangga",
-    text: "Berkarya dari rumah dengan waktu yang fleksibel, cukup dari ponsel.",
-    image: "/images/laundry-home.jpg",
-  },
-  {
-    icon: Laptop,
-    title: "Karyawan & freelancer",
-    text: "Tambah sumber pendapatan dengan jaringan dan kenalan yang sudah kamu miliki.",
-    image: "/images/laptop-hands.jpg",
-  },
-  {
-    icon: Store,
-    title: "Pemilik usaha & komunitas",
-    text: "Tawarkan solusi digital ke sesama pelaku UMKM dan anggota komunitasmu.",
-    image: "/images/open-shop.jpg",
+    title: "Mulai Bagikan",
+    text: "Promosikan lewat WhatsApp, media sosial, atau jaringan pribadi. Komisi dihitung otomatis dan masuk ke saldo.",
   },
 ];
 
 export const faqs: { q: string; a: string }[] = [
   {
     q: "Apa itu Kerjalin?",
-    a: "Kerjalin adalah platform yang menjual layanan SaaS (aplikasi berlangganan) untuk UMKM, mulai dari aplikasi laundry hingga kasir dan toko online, lewat jaringan agen. Agen menawarkan layanan ke pelanggan dan mendapatkan komisi dari setiap langganan.",
+    a: "Kerjalin menjual aplikasi berlangganan (SaaS) dan layanan digital untuk UMKM, seperti aplikasi laundry, kasir, dan toko online, lewat jaringan agen. Agen menawarkan produk ke pelanggan dan mendapat komisi dari setiap langganan.",
   },
   {
-    q: "Apakah saya perlu membayar untuk mendaftar jadi agen?",
-    a: "Tidak. Pendaftaran agen gratis. Penghasilan berasal dari penjualan layanan kepada pelanggan, bukan dari biaya pendaftaran atau merekrut orang.",
+    q: "Apakah saya perlu membayar untuk mendaftar?",
+    a: "Tidak. Pendaftaran agen gratis. Penghasilan berasal dari penjualan produk kepada pelanggan, bukan dari biaya pendaftaran atau perekrutan.",
   },
   {
     q: "Berapa komisi yang saya dapat?",
-    a: "Komisi ditentukan oleh level agen kamu. Sebagai contoh, untuk layanan Rp 100.000 per bulan, agen level tertinggi mendapat Rp 50.000 per langganan. Besaran pastinya bisa kamu lihat di bagian Komisi dan di dashboard agen.",
+    a: "Komisi ditentukan level agen. Untuk produk Rp 100.000 per bulan, agen level tertinggi mendapat Rp 50.000 per langganan. Besaran tiap level ada di bagian Keuntungan dan di dashboard agen.",
   },
   {
-    q: "Apa itu level agen dan bonus tim?",
-    a: "Level menentukan persentase komisi, jumlah agen yang bisa kamu rekrut, dan level yang didapat tim kamu. Saat agen di timmu berhasil menjual, kamu mendapat bonus tim sesuai ketentuan level kamu, tanpa mengurangi komisi mereka.",
+    q: "Apa itu level dan bonus tim?",
+    a: "Level menentukan persentase komisi, jumlah agen yang bisa kamu rekrut, dan level rekrutanmu. Saat agen di timmu berhasil menjual, kamu mendapat bonus tim tanpa mengurangi komisi mereka.",
   },
   {
     q: "Bagaimana cara mencairkan komisi?",
-    a: "Komisi masuk ke saldo di dashboard agen. Kamu cukup mengajukan penarikan ke rekening bank, lalu tim Kerjalin memprosesnya secara manual dan mengunggah bukti transfer. Minimal penarikan Rp 50.000.",
+    a: "Komisi masuk ke saldo di dashboard. Ajukan penarikan ke rekening bank atau e-wallet, lalu tim Kerjalin mentransfer secara manual dan mengunggah bukti transfer. Minimal penarikan Rp 50.000.",
   },
   {
-    q: "Kapan layanan SaaS-nya tersedia?",
-    a: "Layanan pertama kami, Laundry SaaS, sedang dalam tahap akhir pengembangan. Daftar sekarang agar kamu siap jualan begitu layanan dibuka, dan jadi yang pertama membangun tim.",
+    q: "Kapan produknya tersedia?",
+    a: "Produk pertama, Laundry SaaS, sedang dalam tahap akhir pengembangan dan produk lain menyusul. Daftar sekarang agar siap berjualan begitu dibuka dan jadi yang pertama membangun tim.",
   },
   {
     q: "Apakah penghasilan dijamin?",
-    a: "Tidak ada jaminan penghasilan. Hasil bergantung pada usaha menawarkan layanan dan jumlah pelanggan yang berlangganan. Simulasi di situs ini hanya ilustrasi untuk membantu memahami skema komisi.",
+    a: "Tidak ada jaminan penghasilan. Hasil bergantung pada usaha menawarkan produk dan jumlah pelanggan yang berlangganan. Simulasi di situs ini hanya gambaran untuk memahami skema komisi.",
   },
 ];
 
+/** Cadangan bila database belum bisa dibaca. */
 export const fallbackProducts = [
   {
     slug: "laundry-saas",
     name: "Laundry SaaS",
     tagline: "Kelola laundry dari order sampai nota, semua dalam satu aplikasi.",
-    category: "Laundry",
+    categoryName: "Laundry",
     priceMonthly: 100_000,
     imageUrl: "/images/laundry-machines.jpg",
     status: "coming_soon" as const,
@@ -118,23 +68,18 @@ export const fallbackProducts = [
     slug: "kasir-umkm",
     name: "Kasir UMKM",
     tagline: "Mesin kasir digital untuk warung, kafe, dan toko kelontong.",
-    category: "Kasir & Toko",
+    categoryName: "Kasir & Toko",
     priceMonthly: 75_000,
-    imageUrl: "/images/pos-checkout.jpg",
+    imageUrl: "/images/umkm-kasir.jpg",
     status: "coming_soon" as const,
   },
   {
     slug: "toko-online-umkm",
     name: "Toko Online UMKM",
     tagline: "Etalase online sendiri tanpa ribet, siap dibagikan ke WhatsApp.",
-    category: "Kasir & Toko",
+    categoryName: "Kasir & Toko",
     priceMonthly: 60_000,
-    imageUrl: "/images/open-shop.jpg",
+    imageUrl: "/images/umkm-toko.jpg",
     status: "coming_soon" as const,
   },
 ];
-
-export const productCategoryIcon: Record<string, LucideIcon> = {
-  Laundry: ShoppingBag,
-  "Kasir & Toko": Store,
-};

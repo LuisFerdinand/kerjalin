@@ -1,19 +1,21 @@
 "use client";
 
-import { Link2, MessageCircle, Share2 } from "lucide-react";
+import { MessageCircle, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { CopyButton } from "@/components/app/copy-button";
+import { Panel } from "@/components/app/page-header";
 
 export function ReferralCard({
   link,
   code,
-  slotText,
+  title = "Tautan referral",
+  children,
   className,
 }: {
   link: string;
   code: string;
-  slotText?: string;
+  title?: string;
+  children?: React.ReactNode;
   className?: string;
 }) {
   const message = `Yuk gabung jadi agen Kerjalin, jual layanan SaaS untuk UMKM dan dapat komisi! Daftar gratis lewat link ini: ${link}`;
@@ -31,32 +33,24 @@ export function ReferralCard({
   }
 
   return (
-    <Card className={className}>
-      <div className="grid gap-4 p-5">
-        <div className="flex items-center justify-between gap-3">
-          <p className="flex items-center gap-2 text-sm font-bold text-navy">
-            <Link2 className="size-4 text-brand" /> Tautan referral kamu
-          </p>
-          {slotText && <span className="text-xs font-semibold text-muted-foreground">{slotText}</span>}
-        </div>
-        <div className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2.5">
-          <code className="min-w-0 flex-1 truncate text-sm font-semibold text-navy">{link}</code>
+    <Panel title={title} description={`Kode referral ${code}. Orang yang daftar lewat tautan ini masuk ke timmu.`} className={className}>
+      <div className="grid gap-4">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/50 py-1.5 pr-1.5 pl-3">
+          <code className="min-w-0 flex-1 truncate text-[0.9375rem] font-medium text-navy">{link}</code>
+          <CopyButton value={link} label="Salin" successMessage="Tautan referral disalin" variant="default" />
         </div>
         <div className="flex flex-wrap gap-2">
-          <CopyButton value={link} label="Salin tautan" size="default" variant="default" successMessage="Tautan referral disalin" />
           <Button variant="outline" asChild>
             <a href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer">
-              <MessageCircle /> WhatsApp
+              <MessageCircle /> Kirim lewat WhatsApp
             </a>
           </Button>
           <Button variant="outline" onClick={share} className="sm:hidden">
             <Share2 /> Bagikan
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Kode referral: <code className="font-bold text-navy">{code}</code>. Orang yang mendaftar lewat tautan ini otomatis masuk ke timmu.
-        </p>
+        {children}
       </div>
-    </Card>
+    </Panel>
   );
 }

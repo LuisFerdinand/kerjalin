@@ -21,6 +21,7 @@ import {
   walletEntries,
 } from "@/db/schema";
 import { createAgentProfile, createOrder, markOrderPaid } from "@/lib/mlm";
+import { seedCatalog } from "./seed-catalog";
 
 const args = new Set(process.argv.slice(2));
 const DEMO_DOMAIN = "@demo.kerjalin.test";
@@ -40,7 +41,7 @@ async function seedLevels() {
     .values({
       name: "Sub-Agen",
       rank: 3,
-      color: "#12A06B",
+      color: "#6B7A9E",
       description: "Agen di bawah Reseller. Fokus menjual langsung ke pelanggan.",
       commissionPercent: "35",
       overridePercents: [],
@@ -54,7 +55,7 @@ async function seedLevels() {
     .values({
       name: "Agen Reseller",
       rank: 2,
-      color: "#0B78F0",
+      color: "#082052",
       description: "Agen yang boleh merekrut Sub-Agen dan mendapat bonus tim.",
       commissionPercent: "40",
       overridePercents: [10],
@@ -66,7 +67,7 @@ async function seedLevels() {
   await db.insert(agentLevels).values({
     name: "Agen Utama",
     rank: 1,
-    color: "#F5A524",
+    color: "#B36B00",
     description: "Level tertinggi. Komisi terbesar dan bonus dari dua tingkat downline.",
     commissionPercent: "50",
     overridePercents: [10, 5],
@@ -128,63 +129,6 @@ async function seedSuperAdmin() {
 }
 
 /* -------------------------------------------------------------------------- */
-
-async function seedProducts() {
-  const existing = await db.select({ id: products.id }).from(products).limit(1);
-  if (existing.length > 0) {
-    console.log("• Produk sudah ada, dilewati.");
-    return;
-  }
-
-  await db.insert(products).values([
-    {
-      slug: "laundry-saas",
-      name: "Laundry SaaS",
-      tagline: "Kelola laundry dari order sampai nota, semua dalam satu aplikasi.",
-      description:
-        "Aplikasi manajemen laundry untuk outlet kiloan maupun satuan: pencatatan order, status cucian, nota & struk, pelacakan pelanggan, laporan harian, hingga pengingat otomatis lewat WhatsApp.",
-      category: "Laundry",
-      priceMonthly: 100_000,
-      imageUrl: "/images/laundry-machines.jpg",
-      features: [
-        "Order kiloan & satuan",
-        "Nota & struk otomatis",
-        "Status cucian real-time",
-        "Laporan harian & bulanan",
-        "Banyak outlet & karyawan",
-      ],
-      status: "coming_soon",
-      sortOrder: 1,
-    },
-    {
-      slug: "kasir-umkm",
-      name: "Kasir UMKM",
-      tagline: "Mesin kasir digital untuk warung, kafe, dan toko kelontong.",
-      description:
-        "Aplikasi kasir (POS) sederhana: katalog produk, stok, transaksi tunai & QRIS, laporan penjualan, dan struk digital.",
-      category: "Kasir & Toko",
-      priceMonthly: 75_000,
-      imageUrl: "/images/pos-checkout.jpg",
-      features: ["Katalog & stok produk", "Transaksi tunai & QRIS", "Laporan penjualan", "Struk digital"],
-      status: "coming_soon",
-      sortOrder: 2,
-    },
-    {
-      slug: "toko-online-umkm",
-      name: "Toko Online UMKM",
-      tagline: "Etalase online sendiri tanpa ribet, siap dibagikan ke WhatsApp.",
-      description:
-        "Buat toko online dengan katalog, keranjang, dan checkout lewat WhatsApp. Cocok untuk pelaku UMKM yang ingin berjualan lebih luas.",
-      category: "Kasir & Toko",
-      priceMonthly: 60_000,
-      imageUrl: "/images/open-shop.jpg",
-      features: ["Katalog produk", "Checkout via WhatsApp", "Domain sendiri", "Statistik pengunjung"],
-      status: "coming_soon",
-      sortOrder: 3,
-    },
-  ]);
-  console.log("✓ Produk contoh: Laundry SaaS, Kasir UMKM, Toko Online UMKM (status: segera hadir)");
-}
 
 /* -------------------------------------------------------------------------- */
 /*  Data demo                                                                  */
@@ -298,7 +242,7 @@ async function main() {
   }
   await seedLevels();
   await seedSuperAdmin();
-  await seedProducts();
+  await seedCatalog();
   if (args.has("--demo")) await seedDemo();
 }
 

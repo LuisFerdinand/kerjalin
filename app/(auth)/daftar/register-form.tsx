@@ -11,10 +11,12 @@ import { registerAction } from "../actions";
 
 export function RegisterForm({
   defaultReferral,
+  defaultName,
   sponsorName,
   googleEnabled,
 }: {
   defaultReferral?: string;
+  defaultName?: string;
   sponsorName?: string;
   googleEnabled: boolean;
 }) {
@@ -23,15 +25,15 @@ export function RegisterForm({
   return (
     <div className="grid gap-6">
       <div className="grid gap-1.5">
-        <h1 className="text-3xl font-extrabold text-navy">Daftar jadi agen Kerjalin</h1>
+        <h1 className="text-[1.75rem] leading-tight font-bold text-navy">Daftar jadi agen Kerjalin</h1>
         <p className="text-muted-foreground">
           Gratis. Mulai jual layanan SaaS dan dapatkan komisi dari setiap langganan.
         </p>
       </div>
 
       {sponsorName && (
-        <div className="flex items-start gap-3 rounded-xl bg-brand-soft p-3.5 text-sm text-navy">
-          <BadgeCheck className="mt-0.5 size-5 shrink-0 text-brand" />
+        <div className="flex items-start gap-3 rounded-xl bg-card p-4 text-[0.9375rem] text-navy">
+          <BadgeCheck className="mt-0.5 size-5 shrink-0 text-navy" />
           <p>
             Kamu diundang oleh <strong>{sponsorName}</strong>. Kamu akan otomatis bergabung di
             tim-nya.
@@ -48,7 +50,7 @@ export function RegisterForm({
 
       <form {...formProps} className="grid gap-4">
         <FormField label="Nama lengkap" name="name" state={state}>
-          <Input id="name" name="name" autoComplete="name" placeholder="Nama sesuai KTP" required className="h-11" />
+          <Input id="name" name="name" defaultValue={defaultName} autoComplete="name" placeholder="Nama sesuai KTP" required className="h-11" />
         </FormField>
         <FormField label="Email" name="email" state={state}>
           <Input id="email" name="email" type="email" autoComplete="email" placeholder="nama@email.com" required className="h-11" />
@@ -84,15 +86,15 @@ export function RegisterForm({
         </FormField>
 
         <div className="grid gap-1.5">
-          <label className="flex items-start gap-2.5 text-sm text-muted-foreground">
+          <label className="flex items-start gap-2.5 text-[0.9375rem] text-muted-foreground">
             <Checkbox name="terms" id="terms" className="mt-0.5" />
             <span>
               Saya setuju dengan{" "}
-              <Link href="/syarat-ketentuan" target="_blank" className="font-semibold text-brand hover:underline">
+              <Link href="/syarat-ketentuan" target="_blank" className="font-semibold text-navy underline underline-offset-2">
                 syarat & ketentuan
               </Link>{" "}
               serta{" "}
-              <Link href="/kebijakan-privasi" target="_blank" className="font-semibold text-brand hover:underline">
+              <Link href="/kebijakan-privasi" target="_blank" className="font-semibold text-navy underline underline-offset-2">
                 kebijakan privasi
               </Link>{" "}
               Kerjalin, dan memahami bahwa penghasilan berasal dari penjualan layanan, bukan dari biaya
@@ -100,26 +102,26 @@ export function RegisterForm({
             </span>
           </label>
           {state && !state.ok && state.fieldErrors?.terms && (
-            <p role="alert" className="text-xs font-medium text-destructive">
+            <p role="alert" className="text-[0.9375rem] font-medium text-destructive">
               {state.fieldErrors.terms}
             </p>
           )}
         </div>
 
         {state && !state.ok && state.error && !state.fieldErrors && (
-          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-[0.9375rem] text-destructive">
             {state.error}
           </p>
         )}
 
-        <SubmitButton pending={pending} size="lg" className="h-11 text-sm font-semibold" pendingText="Mendaftarkan...">
+        <SubmitButton pending={pending} size="lg" className="h-11 text-[0.9375rem] font-semibold" pendingText="Mendaftarkan...">
           Daftar Sekarang
         </SubmitButton>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-[0.9375rem] text-muted-foreground">
         Sudah punya akun?{" "}
-        <Link href="/masuk" className="font-semibold text-brand hover:underline">
+        <Link href="/masuk" className="font-semibold text-navy underline underline-offset-2">
           Masuk
         </Link>
       </p>

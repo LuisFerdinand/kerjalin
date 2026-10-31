@@ -1,0 +1,1891 @@
+{
+ "url": "http://localhost:3300/produk/laundry-saas",
+ "at": "2026-10-31T06:15:50.270Z",
+ "allow": [
+  "palette-cream"
+ ],
+ "viewports": [
+  {
+   "width": 1440,
+   "height": 900,
+   "load": "load",
+   "screens": 5,
+   "filled": [
+    0.64,
+    0.38,
+    0.51,
+    0.63,
+    0.86
+   ],
+   "motion": {
+    "elements": 17,
+    "css": 12,
+    "transitions": 0,
+    "scripted": 5,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "page": {
+     "height": 3983,
+     "screens": 4.4,
+     "words": 329,
+     "img": 10,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 6,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 6,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "image?url=%2Fimages%2Flaundry-machines.jpg&w=108",
+      "image?url=%2Fimages%2Flaundry-shop.jpg&w=1080&q=",
+      "image?url=%2Fimages%2Flaundry-folding.jpg&w=1080",
+      "image?url=%2Fimages%2Flaundry-home.jpg&w=1080&q=",
+      "image?url=%2Fimages%2Fpos-checkout.jpg&w=640&q=7",
+      "image?url=%2Fimages%2Fopen-shop.jpg&w=640&q=75"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 51.8,
+     "vw": 3.6,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "right",
+     "widthRatio": 0.37,
+     "top": 170,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "lines": 1,
+     "size": 51.8,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Laundry SaaS",
+      "words": 2,
+      "chars": 12,
+      "lines": 1,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.37,
+      "top": 170,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 100.000",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.5,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.11,
+      "top": 882,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "Tentang layanan ini",
+      "words": 3,
+      "chars": 19,
+      "lines": 2,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 1188,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fitur yang kamu dapat",
+      "words": 4,
+      "chars": 21,
+      "lines": 2,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 1412,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Spesifikasi",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 1641,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Pertanyaan umum",
+      "words": 2,
+      "chars": 15,
+      "lines": 2,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 2065,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Layanan lainnya",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 51.8,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.3,
+      "top": 2409,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kasir UMKM",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.2,
+      "top": 2433,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 75.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "right",
+      "position": "right",
+      "widthRatio": 0.15,
+      "top": 2454,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Toko Online UMKM",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.2,
+      "top": 2780,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 60.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 1.9,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "right",
+      "position": "right",
+      "widthRatio": 0.15,
+      "top": 2802,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "K E R J A L I N",
+      "words": 8,
+      "chars": 15,
+      "lines": 1,
+      "size": 216,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 3271,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 12,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 3,
+     "centered": 0,
+     "medianWords": 2,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      15,
+      17,
+      19,
+      21,
+      28,
+      52,
+      216
+     ],
+     "sizeCount": 7,
+     "notLoaded": [],
+     "body": {
+      "font": "Plus Jakarta Sans",
+      "size": 17,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 13.9
+     },
+     "measureChars": 76,
+     "max": {
+      "size": 216,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "text": "K"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f8f0e5",
+     "bodyBgHsl": {
+      "h": 35,
+      "s": 0.58,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 170,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#082052",
+       "top": 3215,
+       "hsl": {
+        "h": 221,
+        "s": 0.82,
+        "l": 0.18
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#082052",
+       "share": 0.74
+      },
+      {
+       "color": "#f8f0e5",
+       "share": 0.13
+      },
+      {
+       "color": "#475373",
+       "share": 0.12
+      },
+      {
+       "color": "#247b50",
+       "share": 0.01
+      },
+      {
+       "color": "#5b6c99",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#082052",
+      "hsl": {
+       "h": 221,
+       "s": 0.82,
+       "l": 0.18
+      },
+      "fg": "#f8f0e5"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 5,
+     "inHero": 2,
+     "radius": 8,
+     "height": 44,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Daftar gratis",
+      "Jadi agen, jual ini"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 15,
+     "boxRadius": 10,
+     "squareMedia": 0,
+     "roundedMedia": 6,
+     "mediaRadius": 18,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.33
+     },
+     {
+      "type": "img",
+      "ratio": 0.33
+     },
+     {
+      "type": "img",
+      "ratio": 0.33
+     },
+     {
+      "type": "img",
+      "ratio": 0.33
+     }
+    ],
+    "nav": {
+     "links": 7,
+     "fixed": true,
+     "height": 72,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "plus jakarta sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 1440,
+     "h": 900
+    },
+    "pageH": 3983,
+    "margins": {
+     "left": 44,
+     "right": 64
+    },
+    "sections": [
+     {
+      "sel": "main.flex-1",
+      "tag": "main",
+      "top": 72,
+      "height": 3143,
+      "words": 335,
+      "media": 3,
+      "middle": 0,
+      "heading": {
+       "text": "Laundry SaaS",
+       "size": 52,
+       "tag": "h1"
+      },
+      "left": 44,
+      "right": 64,
+      "textLeft": 44,
+      "textRight": 64,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": true
+     },
+     {
+      "sel": "footer.px-3.pb-3",
+      "tag": "footer",
+      "top": 3215,
+      "height": 768,
+      "words": 36,
+      "media": 0,
+      "middle": 288,
+      "heading": null,
+      "left": 60,
+      "right": 84,
+      "textLeft": 60,
+      "textRight": 84,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Laundry SaaS",
+      "size": 52,
+      "top": 170,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 44,
+      "n": 5
+     },
+     {
+      "x": 561,
+      "n": 3
+     },
+     {
+      "x": 845,
+      "n": 3
+     },
+     {
+      "x": 859,
+      "n": 2
+     },
+     {
+      "x": 537,
+      "n": 1
+     }
+    ],
+    "leftBlocks": 14,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0.06,
+    "voidBox": {
+     "x": 1080,
+     "y": 360,
+     "w": 180,
+     "h": 420
+    }
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 768,
+   "height": 1024,
+   "load": "load",
+   "screens": 5,
+   "filled": [
+    0.7,
+    0.48,
+    0.65,
+    0.75,
+    0.79
+   ],
+   "motion": {
+    "elements": 17,
+    "css": 12,
+    "transitions": 0,
+    "scripted": 5,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "page": {
+     "height": 4774,
+     "screens": 4.7,
+     "words": 321,
+     "img": 10,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 6,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 6,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "image?url=%2Fimages%2Flaundry-machines.jpg&w=828",
+      "image?url=%2Fimages%2Flaundry-shop.jpg&w=828&q=7",
+      "image?url=%2Fimages%2Flaundry-folding.jpg&w=828&",
+      "image?url=%2Fimages%2Flaundry-home.jpg&w=828&q=7",
+      "image?url=%2Fimages%2Fpos-checkout.jpg&w=640&q=7",
+      "image?url=%2Fimages%2Fopen-shop.jpg&w=640&q=75"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 32,
+     "vw": 4.2,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.94,
+     "top": 846,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "lines": 1,
+     "size": 32,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Laundry SaaS",
+      "words": 2,
+      "chars": 12,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.94,
+      "top": 846,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 100.000",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.5,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.2,
+      "top": 1508,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "Tentang layanan ini",
+      "words": 3,
+      "chars": 19,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 1754,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fitur yang kamu dapat",
+      "words": 4,
+      "chars": 21,
+      "lines": 2,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 1985,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Spesifikasi",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 2276,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Pertanyaan umum",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 2726,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Layanan lainnya",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 32,
+      "vw": 4.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.41,
+      "top": 3096,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kasir UMKM",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.55,
+      "top": 3179,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 75.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.35,
+      "top": 3435,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Toko Online UMKM",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "right",
+      "widthRatio": 0.55,
+      "top": 3589,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 60.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 3.6,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.35,
+      "top": 3871,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "K E R J A L I N",
+      "words": 8,
+      "chars": 15,
+      "lines": 1,
+      "size": 115.2,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.89,
+      "top": 4121,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 12,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 3,
+     "centered": 0,
+     "medianWords": 2,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      15,
+      17,
+      19,
+      21,
+      28,
+      32,
+      115
+     ],
+     "sizeCount": 7,
+     "notLoaded": [],
+     "body": {
+      "font": "Plus Jakarta Sans",
+      "size": 17,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 13.9
+     },
+     "measureChars": 76,
+     "max": {
+      "size": 115.2,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "text": "K"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f8f0e5",
+     "bodyBgHsl": {
+      "h": 35,
+      "s": 0.58,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 154,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#082052",
+       "top": 4081,
+       "hsl": {
+        "h": 221,
+        "s": 0.82,
+        "l": 0.18
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#082052",
+       "share": 0.74
+      },
+      {
+       "color": "#f8f0e5",
+       "share": 0.13
+      },
+      {
+       "color": "#475373",
+       "share": 0.12
+      },
+      {
+       "color": "#247b50",
+       "share": 0.01
+      },
+      {
+       "color": "#5b6c99",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#082052",
+      "hsl": {
+       "h": 221,
+       "s": 0.82,
+       "l": 0.18
+      },
+      "fg": "#f8f0e5"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 4,
+     "inHero": 1,
+     "radius": 8,
+     "height": 48,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Jadi agen, jual ini"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 7,
+     "boxRadius": 18,
+     "squareMedia": 0,
+     "roundedMedia": 6,
+     "mediaRadius": 18,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.49
+     },
+     {
+      "type": "img",
+      "ratio": 0.49
+     },
+     {
+      "type": "img",
+      "ratio": 0.49
+     },
+     {
+      "type": "img",
+      "ratio": 0.49
+     }
+    ],
+    "nav": {
+     "links": 1,
+     "fixed": true,
+     "height": 72,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "plus jakarta sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 768,
+     "h": 1024
+    },
+    "pageH": 4774,
+    "margins": {
+     "left": 24,
+     "right": 46
+    },
+    "sections": [
+     {
+      "sel": "main.flex-1",
+      "tag": "main",
+      "top": 72,
+      "height": 4009,
+      "words": 335,
+      "media": 3,
+      "middle": 0,
+      "heading": {
+       "text": "Laundry SaaS",
+       "size": 32,
+       "tag": "h1"
+      },
+      "left": 24,
+      "right": 24,
+      "textLeft": 24,
+      "textRight": 46,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer.px-3.pb-3",
+      "tag": "footer",
+      "top": 4081,
+      "height": 693,
+      "words": 36,
+      "media": 0,
+      "middle": 46,
+      "heading": null,
+      "left": 44,
+      "right": 97,
+      "textLeft": 44,
+      "textRight": 97,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Laundry SaaS",
+      "size": 32,
+      "top": 846,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 24,
+      "n": 8
+     },
+     {
+      "x": 48,
+      "n": 3
+     },
+     {
+      "x": 304,
+      "n": 3
+     }
+    ],
+    "leftBlocks": 14,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  },
+  {
+   "width": 390,
+   "height": 844,
+   "load": "load",
+   "screens": 7,
+   "filled": [
+    0.6,
+    0.81,
+    0.5,
+    0.76,
+    0.9,
+    0.82,
+    0.87
+   ],
+   "motion": {
+    "elements": 17,
+    "css": 12,
+    "transitions": 0,
+    "scripted": 5,
+    "videos": 0,
+    "playingVideos": 0
+   },
+   "metrics": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "page": {
+     "height": 5906,
+     "screens": 7,
+     "words": 321,
+     "img": 10,
+     "video": 0,
+     "canvas": 0,
+     "svg": 2,
+     "sections": 6,
+     "horizontalOverflow": 0,
+     "overflowCulprits": [],
+     "uiFragments": 0,
+     "uiAbuse": false,
+     "realPictures": 6,
+     "videoCount": 0,
+     "uiPictures": 0,
+     "pictureSamples": [
+      "image?url=%2Fimages%2Flaundry-machines.jpg&w=640",
+      "image?url=%2Fimages%2Flaundry-shop.jpg&w=640&q=7",
+      "image?url=%2Fimages%2Flaundry-folding.jpg&w=640&",
+      "image?url=%2Fimages%2Flaundry-home.jpg&w=640&q=7",
+      "image?url=%2Fimages%2Fpos-checkout.jpg&w=640&q=7",
+      "image?url=%2Fimages%2Fopen-shop.jpg&w=640&q=75"
+     ],
+     "blendText": 0,
+     "sideScrollers": 0,
+     "brokenImages": [],
+     "emoji": [],
+     "videosNoPoster": 0
+    },
+    "hero": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "chars": 12,
+     "lines": 1,
+     "size": 32,
+     "vw": 8.2,
+     "font": "Plus Jakarta Sans",
+     "weight": 700,
+     "tracking": -0.025,
+     "leading": 1.02,
+     "upper": false,
+     "italic": false,
+     "mono": false,
+     "align": "left",
+     "position": "center",
+     "widthRatio": 0.92,
+     "top": 564,
+     "tag": "h1",
+     "kind": "heading"
+    },
+    "h1": {
+     "text": "Laundry SaaS",
+     "words": 2,
+     "lines": 1,
+     "size": 32,
+     "font": "Plus Jakarta Sans"
+    },
+    "headings": [
+     {
+      "text": "Laundry SaaS",
+      "words": 2,
+      "chars": 12,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.02,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.92,
+      "top": 564,
+      "tag": "h1",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 100.000",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.5,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.39,
+      "top": 1358,
+      "tag": "span",
+      "kind": "statement"
+     },
+     {
+      "text": "Tentang layanan ini",
+      "words": 3,
+      "chars": 19,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.81,
+      "top": 1660,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Fitur yang kamu dapat",
+      "words": 4,
+      "chars": 21,
+      "lines": 2,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.81,
+      "top": 1984,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Spesifikasi",
+      "words": 1,
+      "chars": 11,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.81,
+      "top": 2363,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Pertanyaan umum",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.81,
+      "top": 2961,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Layanan lainnya",
+      "words": 2,
+      "chars": 15,
+      "lines": 1,
+      "size": 32,
+      "vw": 8.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.08,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.81,
+      "top": 3382,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Kasir UMKM",
+      "words": 2,
+      "chars": 10,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.84,
+      "top": 3725,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 75.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.44,
+      "top": 4070,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "Toko Online UMKM",
+      "words": 3,
+      "chars": 16,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": -0.025,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.84,
+      "top": 4506,
+      "tag": "h2",
+      "kind": "heading"
+     },
+     {
+      "text": "Rp 60.000",
+      "words": 2,
+      "chars": 9,
+      "lines": 1,
+      "size": 28,
+      "vw": 7.2,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1.25,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "left",
+      "widthRatio": 0.44,
+      "top": 4851,
+      "tag": "p",
+      "kind": "statement"
+     },
+     {
+      "text": "K E R J A L I N",
+      "words": 8,
+      "chars": 15,
+      "lines": 1,
+      "size": 58.5,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "weight": 700,
+      "tracking": 0,
+      "leading": 1,
+      "upper": false,
+      "italic": false,
+      "mono": false,
+      "align": "left",
+      "position": "center",
+      "widthRatio": 0.86,
+      "top": 5122,
+      "tag": "div",
+      "kind": "heading"
+     }
+    ],
+    "headingSummary": {
+     "count": 12,
+     "maxLines": 2,
+     "over2Lines": 0,
+     "statements": 3,
+     "centered": 0,
+     "medianWords": 2,
+     "mixedFontHeadings": 0
+    },
+    "type": {
+     "families": [
+      {
+       "family": "Plus Jakarta Sans",
+       "share": 1,
+       "mono": false
+      }
+     ],
+     "familyCount": 1,
+     "sizes": [
+      15,
+      17,
+      19,
+      21,
+      28,
+      32,
+      59
+     ],
+     "sizeCount": 7,
+     "notLoaded": [],
+     "body": {
+      "font": "Plus Jakarta Sans",
+      "size": 17,
+      "leading": 1.63,
+      "weight": 400,
+      "tracking": 0,
+      "contrast": 13.9
+     },
+     "measureChars": 38,
+     "max": {
+      "size": 58.5,
+      "vw": 15,
+      "font": "Plus Jakarta Sans",
+      "text": "K"
+     },
+     "monoShare": 0,
+     "monoProseShare": 0,
+     "monoFamilies": [],
+     "monoSamples": [],
+     "microLabels": 0,
+     "microLabelShare": 0,
+     "microSamples": [],
+     "upperShare": 0,
+     "centerShare": 0.01,
+     "smallText": 0
+    },
+    "eyebrows": [],
+    "numbered": [],
+    "color": {
+     "bodyBg": "#f8f0e5",
+     "bodyBgHsl": {
+      "h": 35,
+      "s": 0.58,
+      "l": 0.94
+     },
+     "dark": false,
+     "sectionBgs": [
+      {
+       "color": "#ffffff",
+       "top": 849,
+       "hsl": {
+        "h": 0,
+        "s": 0,
+        "l": 1
+       }
+      },
+      {
+       "color": "#082052",
+       "top": 5082,
+       "hsl": {
+        "h": 221,
+        "s": 0.82,
+        "l": 0.18
+       }
+      }
+     ],
+     "textColors": [
+      {
+       "color": "#082052",
+       "share": 0.74
+      },
+      {
+       "color": "#f8f0e5",
+       "share": 0.13
+      },
+      {
+       "color": "#475373",
+       "share": 0.12
+      },
+      {
+       "color": "#247b50",
+       "share": 0.01
+      },
+      {
+       "color": "#5b6c99",
+       "share": 0
+      }
+     ],
+     "button": {
+      "bg": "#ffffff",
+      "hsl": {
+       "h": 0,
+       "s": 0,
+       "l": 1
+      },
+      "fg": "#082052"
+     },
+     "lowContrast": []
+    },
+    "buttons": {
+     "count": 8,
+     "inHero": 5,
+     "radius": 14,
+     "height": 60,
+     "withShadow": 0,
+     "withGradient": 0,
+     "mono": 0,
+     "upper": 0,
+     "heroLabels": [
+      "Jadi agen, jual ini"
+     ]
+    },
+    "surfaces": {
+     "shadowStatic": 0,
+     "shadowOverlay": 0,
+     "shadowSamples": [],
+     "gradients": 0,
+     "scrims": 0,
+     "gradientSamples": [],
+     "gradientText": 0,
+     "hairlines": 0,
+     "hairlineSamples": [],
+     "outlinedBoxes": 0,
+     "dashed": 0,
+     "blurred": 0,
+     "roundedBoxes": 17,
+     "boxRadius": 14,
+     "squareMedia": 0,
+     "roundedMedia": 6,
+     "mediaRadius": 18,
+     "textShadow": 0,
+     "cardRows": []
+    },
+    "heroMedia": [
+     {
+      "type": "img",
+      "ratio": 0.29
+     },
+     {
+      "type": "img",
+      "ratio": 0.29
+     },
+     {
+      "type": "img",
+      "ratio": 0.29
+     },
+     {
+      "type": "img",
+      "ratio": 0.29
+     }
+    ],
+    "nav": {
+     "links": 1,
+     "fixed": true,
+     "height": 72,
+     "floatingPill": false,
+     "blur": false
+    },
+    "fontsLoaded": [
+     "plus jakarta sans"
+    ]
+   },
+   "layout": {
+    "viewport": {
+     "w": 390,
+     "h": 844
+    },
+    "pageH": 5906,
+    "margins": {
+     "left": 16,
+     "right": 16
+    },
+    "sections": [
+     {
+      "sel": "main.flex-1",
+      "tag": "main",
+      "top": 72,
+      "height": 5010,
+      "words": 335,
+      "media": 3,
+      "middle": 0,
+      "heading": {
+       "text": "Laundry SaaS",
+       "size": 32,
+       "tag": "h1"
+      },
+      "left": 16,
+      "right": 16,
+      "textLeft": 16,
+      "textRight": 24,
+      "fullBleed": false,
+      "footer": false,
+      "hero": true,
+      "continues": false,
+      "pinned": false
+     },
+     {
+      "sel": "footer.px-3.pb-3",
+      "tag": "footer",
+      "top": 5082,
+      "height": 824,
+      "words": 36,
+      "media": 0,
+      "middle": 0,
+      "heading": null,
+      "left": 28,
+      "right": 36,
+      "textLeft": 28,
+      "textRight": 36,
+      "fullBleed": false,
+      "footer": true,
+      "hero": false,
+      "continues": false,
+      "pinned": false
+     }
+    ],
+    "gaps": [],
+    "h1s": [
+     {
+      "text": "Laundry SaaS",
+      "size": 32,
+      "top": 564,
+      "firstScreen": true
+     }
+    ],
+    "edgeText": [],
+    "edges": [
+     {
+      "x": 16,
+      "n": 8
+     },
+     {
+      "x": 32,
+      "n": 6
+     }
+    ],
+    "leftBlocks": 14,
+    "bodySize": 17,
+    "stage": false,
+    "explains": true,
+    "slivers": [],
+    "voidShare": 0,
+    "voidBox": null
+   },
+   "app": null,
+   "consoleErrors": []
+  }
+ ],
+ "findings": [
+  {
+   "level": "WARN",
+   "id": "no-footage",
+   "width": 1440,
+   "message": "No video anywhere on the page.",
+   "fix": "Look for one honest clip with scripts/assets.mjs --video (the place, the material, the process) and use it as a muted loop with a poster frame. Defend its absence only if no clip fits the subject."
+  },
+  {
+   "level": "WARN",
+   "id": "off-centre",
+   "width": 1440,
+   "message": "The margins differ: 44px on the left, 64px on the right, at 1440px.",
+   "fix": "Put the navigation and the content on one pair of margins; check for padding on one side only, a scrollbar gutter, or a header on another inset than the page.",
+   "alsoAt": [
+    768
+   ]
+  }
+ ],
+ "images": [
+  {
+   "viewport": "desktop",
+   "width": 1440,
+   "fold": "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\desktop-fold.jpg",
+   "pages": [
+    "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\desktop-page-01.jpg",
+    "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\desktop-page-02.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "tablet",
+   "width": 768,
+   "fold": "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\tablet-fold.jpg",
+   "pages": [
+    "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\tablet-page-01.jpg"
+   ],
+   "film": []
+  },
+  {
+   "viewport": "mobile",
+   "width": 390,
+   "fold": "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\mobile-fold.jpg",
+   "pages": [
+    "D:\\WORK\\My Company\\Projects\\kerjalin\\website\\.taste-skill\\page\\inspect-pdp\\mobile-page-01.jpg"
+   ],
+   "film": []
+  }
+ ]
+}

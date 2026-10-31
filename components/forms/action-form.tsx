@@ -63,10 +63,13 @@ export function SubmitButton({
 }
 
 export function FieldError({ state, name }: { state: ActionState; name: string }) {
-  const message = state && !state.ok ? state.fieldErrors?.[name] : undefined;
+  const errors = state && !state.ok ? state.fieldErrors : undefined;
+  // Cocokkan nama persis, atau elemen di dalamnya (mis. pricingPlans.0.price).
+  const message =
+    errors?.[name] ?? Object.entries(errors ?? {}).find(([key]) => key.startsWith(`${name}.`))?.[1];
   if (!message) return null;
   return (
-    <p role="alert" className="text-xs font-medium text-destructive">
+    <p role="alert" className="text-[0.8125rem] font-medium text-destructive">
       {message}
     </p>
   );

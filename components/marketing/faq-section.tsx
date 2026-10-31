@@ -1,38 +1,23 @@
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { faqs } from "@/lib/content";
+import { FaqTiles } from "./faq-tiles";
 import { Reveal } from "./reveal";
 
 export function FaqSection() {
   return (
-    <section id="faq" className="scroll-mt-20 py-20 lg:py-28">
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr]">
+    <section id="faq" className="scroll-mt-24 pb-16 lg:pb-24">
+      <div className="mx-auto grid w-full max-w-[1240px] gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)] lg:gap-16 lg:px-8">
         <Reveal>
-          <p className="text-sm font-bold tracking-widest text-brand uppercase">FAQ</p>
-          <h2 className="mt-3 text-3xl font-extrabold text-balance text-navy sm:text-4xl">
-            Pertanyaan yang sering ditanyakan
-          </h2>
-          <p className="mt-4 text-lg text-navy/70">
-            Belum menemukan jawabannya? Hubungi kami lewat kontak di bagian bawah halaman.
-          </p>
+          <div className="lg:sticky lg:top-28">
+            <h2 className="text-[clamp(1.75rem,3.2vw,2.5rem)] leading-tight font-extrabold text-balance text-navy">
+              Pertanyaan yang Sering Muncul
+            </h2>
+            <p className="mt-3 max-w-[34ch] text-muted-foreground">
+              Belum menemukan jawabannya? Daftar saja dulu, tim Kerjalin siap membantu setelah akunmu aktif.
+            </p>
+          </div>
         </Reveal>
-
-        <Reveal delay={0.1}>
-          <Accordion type="single" collapsible className="grid gap-3">
-            {faqs.map((f, i) => (
-              <AccordionItem
-                key={f.q}
-                value={`faq-${i}`}
-                className="rounded-2xl border bg-card px-5 data-[state=open]:shadow-md data-[state=open]:shadow-navy/5"
-              >
-                <AccordionTrigger className="py-4 text-left text-base font-semibold text-navy hover:no-underline">
-                  {f.q}
-                </AccordionTrigger>
-                <AccordionContent className="pb-5 text-base leading-relaxed text-navy/70">
-                  {f.a}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <Reveal delay={0.08}>
+          <FaqTiles items={faqs} />
         </Reveal>
       </div>
     </section>

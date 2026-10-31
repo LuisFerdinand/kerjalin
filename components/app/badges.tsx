@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type {
   AgentStatus,
@@ -8,15 +7,23 @@ import type {
   WithdrawalStatus,
 } from "@/db/schema";
 
-type Tone = "green" | "amber" | "red" | "blue" | "gray" | "navy";
+type Tone = "green" | "amber" | "red" | "navy" | "gray";
 
+/** Pasangan pucat: latar muda + teks gelap dari warna yang sama. */
 const tones: Record<Tone, string> = {
-  green: "bg-success/12 text-success border-success/20",
-  amber: "bg-warning/12 text-warning border-warning/25",
-  red: "bg-destructive/10 text-destructive border-destructive/20",
-  blue: "bg-brand/10 text-brand border-brand/20",
-  gray: "bg-muted text-muted-foreground border-border",
-  navy: "bg-navy/10 text-navy border-navy/15",
+  green: "bg-[#dcfae5] text-[#04250e]",
+  amber: "bg-[#fff4d6] text-[#7a4a00]",
+  red: "bg-[#ffedea] text-[#831c1e]",
+  navy: "bg-brand-soft text-navy",
+  gray: "bg-[#eef1f8] text-[#475373]",
+};
+
+const dots: Record<Tone, string> = {
+  green: "bg-positive",
+  amber: "bg-warning",
+  red: "bg-negative",
+  navy: "bg-navy",
+  gray: "bg-[#8a93ab]",
 };
 
 export function StatusBadge({
@@ -29,10 +36,16 @@ export function StatusBadge({
   className?: string;
 }) {
   return (
-    <Badge variant="outline" className={cn("gap-1.5 font-semibold", tones[tone], className)}>
-      <span className="size-1.5 rounded-full bg-current" />
+    <span
+      className={cn(
+        "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[0.8125rem] font-medium whitespace-nowrap",
+        tones[tone],
+        className,
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", dots[tone])} aria-hidden />
       {children}
-    </Badge>
+    </span>
   );
 }
 
@@ -69,7 +82,7 @@ export function WithdrawalStatusBadge({ status }: { status: WithdrawalStatus }) 
 
 const productStatus: Record<ProductStatus, [Tone, string]> = {
   active: ["green", "Aktif"],
-  coming_soon: ["blue", "Segera hadir"],
+  coming_soon: ["navy", "Segera hadir"],
   draft: ["gray", "Draf"],
   archived: ["red", "Diarsipkan"],
 };
@@ -89,9 +102,9 @@ export const walletTypeLabel: Record<WalletEntryType, string> = {
 
 const walletTone: Record<WalletEntryType, Tone> = {
   commission: "green",
-  override: "blue",
+  override: "navy",
   reversal: "red",
-  adjustment: "navy",
+  adjustment: "gray",
   withdrawal: "amber",
   withdrawal_refund: "gray",
 };
@@ -99,13 +112,11 @@ export function WalletTypeBadge({ type }: { type: WalletEntryType }) {
   return <StatusBadge tone={walletTone[type]}>{walletTypeLabel[type]}</StatusBadge>;
 }
 
+/** Level agen: titik warna level + nama. Warna level hanya identitas, bukan status. */
 export function LevelBadge({ name, color }: { name: string; color: string }) {
   return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold"
-      style={{ color, borderColor: `${color}40`, backgroundColor: `${color}14` }}
-    >
-      <span className="size-1.5 rounded-full" style={{ backgroundColor: color }} />
+    <span className="inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full bg-muted px-2.5 text-[0.8125rem] font-medium whitespace-nowrap text-navy">
+      <span className="size-2 rounded-full" style={{ backgroundColor: color }} aria-hidden />
       {name}
     </span>
   );

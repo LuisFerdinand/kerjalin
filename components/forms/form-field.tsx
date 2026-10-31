@@ -25,11 +25,13 @@ export function FormField({
 }) {
   return (
     <div className={cn("grid gap-1.5", className)}>
-      <Label htmlFor={name} className="text-sm font-medium">
-        {label}
-      </Label>
+      {label && (
+        <Label htmlFor={name} className="text-sm font-medium">
+          {label}
+        </Label>
+      )}
       {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {hint && <p className="text-[0.8125rem] text-muted-foreground">{hint}</p>}
       {state !== undefined && <FieldError state={state} name={name} />}
     </div>
   );
@@ -44,7 +46,7 @@ export function PasswordInput({ className, ...props }: Omit<ComponentProps<typeo
         type="button"
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
-        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-faint transition-colors hover:text-foreground"
       >
         {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </button>

@@ -1,62 +1,96 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
-import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand/logo";
 import { navLinks } from "@/lib/content";
+import { getCatalogFacets } from "@/lib/queries/catalog";
 import { MobileNav } from "./mobile-nav";
+import { NavLinks } from "./nav-links";
 
-function GuestButtons() {
+const outlineButton =
+  "inline-flex h-11 items-center rounded-xl border border-input bg-white px-5 text-[0.9375rem] font-semibold text-navy transition-colors hover:border-navy hover:bg-muted";
+const solidButton =
+  "inline-flex h-11 items-center rounded-xl bg-navy px-6 text-[0.9375rem] font-semibold text-white shadow-sm transition-colors hover:bg-navy-soft";
+
+function GuestActions() {
   return (
     <>
-      <Button asChild variant="ghost" size="lg" className="h-10 px-4 text-sm font-semibold">
-        <Link href="/masuk">Masuk</Link>
-      </Button>
-      <Button asChild size="lg" className="h-10 px-5 text-sm font-semibold shadow-sm shadow-brand/30">
-        <Link href="/daftar">Daftar Sekarang</Link>
-      </Button>
+      <Link href="/masuk" className={outlineButton}>
+        Masuk
+      </Link>
+      <Link href="/daftar" className={solidButton}>
+        Daftar Sekarang
+      </Link>
     </>
   );
 }
 
 /** Cek cepat ada tidaknya cookie sesi (validasi penuh dilakukan di dashboard). */
-async function AuthButtons() {
-  const hasSession = (await cookies()).getAll().some((c) => c.name.endsWith("session_token"));
-  if (!hasSession) return <GuestButtons />;
+async function hasSession() {
+  return (await cookies()).getAll().some((c) => c.name.endsWith("session_token"));
+}
+
+async function Actions() {
+  if (!(await hasSession())) return <GuestActions />;
   return (
-    <Button asChild size="lg" className="h-10 px-5 text-sm font-semibold">
-      <Link href="/dashboard">Buka Dashboard</Link>
-    </Button>
+    <Link href="/dashboard" className={solidButton}>
+      Buka dashboard
+    </Link>
   );
+}
+
+/** Tampilan awal menu selagi kategori dimuat. Tanpa penanda halaman aktif, karena itu butuh pathname. */
+function StaticLinks() {
+  return (
+    <nav aria-label="Navigasi utama" className="hidden items-center gap-1 lg:flex">
+      {navLinks.map((l) => (
+        <Link
+          key={l.href}
+          href={l.href}
+          className="inline-flex h-10 items-center rounded-lg px-3 text-[0.9375rem] font-semibold text-navy/80 transition-colors hover:bg-muted hover:text-navy"
+        >
+          {l.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+async function loadCategories() {
+  const facets = await getCatalogFacets();
+  return facets.categories.map((c) => ({ name: c.name, slug: c.slug, count: c.count }));
+}
+
+async function DesktopMenu() {
+  return <NavLinks links={navLinks} categories={await loadCategories()} />;
+}
+
+async function MobileMenu() {
+  const [categories, signedIn] = await Promise.all([loadCategories(), hasSession()]);
+  return <MobileNav links={navLinks} categories={categories} signedIn={signedIn} />;
 }
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:h-[72px]">
-        <Link href="/" aria-label="Kerjalin — beranda">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex h-[72px] w-full max-w-[1240px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+        <Link href="/" aria-label="Kerjalin, beranda" className="shrink-0">
           <Logo />
         </Link>
 
-        <nav aria-label="Navigasi utama" className="hidden items-center gap-1 lg:flex">
-          {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={`/${l.href}`}
-              className="rounded-lg px-3.5 py-2 text-sm font-medium text-navy/80 transition-colors hover:bg-accent hover:text-navy"
-            >
-              {l.label}
-            </a>
-          ))}
-        </nav>
+        <Suspense fallback={<StaticLinks />}>
+          <DesktopMenu />
+        </Suspense>
 
         <div className="hidden items-center gap-2 lg:flex">
-          <Suspense fallback={<GuestButtons />}>
-            <AuthButtons />
+          <Suspense fallback={<GuestActions />}>
+            <Actions />
           </Suspense>
         </div>
 
-        <MobileNav links={navLinks} />
+        <Suspense fallback={<MobileNav links={navLinks} categories={[]} signedIn={false} />}>
+          <MobileMenu />
+        </Suspense>
       </div>
     </header>
   );

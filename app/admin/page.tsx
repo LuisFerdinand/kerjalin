@@ -1,269 +1,333 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowUpRight,
+  ArrowRight,
   Banknote,
-  CircleDollarSign,
   Hourglass,
-  Network,
+  Layers,
+  PackagePlus,
+  Percent,
   ReceiptText,
+  ShoppingBag,
+  UserCheck,
+  UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AgentStatusBadge, LevelBadge, OrderStatusBadge } from "@/components/app/badges";
-import { StackedAreaChart } from "@/components/app/charts";
-import { PageHeader, StatCard } from "@/components/app/page-header";
-import { formatDate, formatIDR, initials } from "@/lib/format";
+import { LevelBadge, OrderStatusBadge } from "@/components/app/badges";
+import { BarsChart, ChartKey } from "@/components/app/charts";
+import {
+  ActivityList,
+  PendingCards,
+  QuickActions,
+  RankedList,
+  StatCard,
+  WelcomeBanner,
+  type ActivityItem,
+  type PendingItem,
+  type Tone,
+} from "@/components/app/dash";
+import { Panel } from "@/components/app/page-header";
+import { SplitBar } from "@/components/app/split-bar";
+import { formatIDR, formatPercent, formatRelative, formatToday, initials } from "@/lib/format";
 import { getAdminOverview } from "@/lib/queries/admin";
 import { requireAdmin } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Ringkasan" };
 
+const SERIES = [
+  { key: "admin", label: "Bagian Kerjalin", color: "#082052" },
+  { key: "commission", label: "Komisi dan bonus agen", color: "#9db0dd" },
+];
+
+const ORDER_TONE: Record<string, Tone> = { paid: "teal", pending: "amber", cancelled: "rose", refunded: "rose" };
+
 export default async function AdminOverviewPage() {
   const admin = await requireAdmin();
   const o = await getAdminOverview();
-  const maxLevelCount = Math.max(1, ...o.levelDistribution.map((l) => l.count));
+  const p = o.period;
+  const agentShare = p.commission + p.override;
+  const maxLevel = Math.max(1, ...o.levelDistribution.map((l) => l.count));
+  const orderTotal = o.orders.paidCount + o.orders.pendingCount;
+  const adminPercent = p.gross ? (p.admin / p.gross) * 100 : 0;
+  const withdrawnPercent = o.wallet.earned > 0 ? (o.withdrawals.paidAmount / o.wallet.earned) * 100 : 0;
+
+  const activity: ActivityItem[] = [
+    ...o.recentOrders.map((r) => ({
+      at: new Date(r.createdAt).getTime(),
+      item: {
+        id: `o-${r.id}`,
+        icon: ReceiptText,
+        tone: ORDER_TONE[r.status] ?? "navy",
+        title: (
+          <>
+            {r.sellerName ?? "Penjualan langsung"} · {r.productName}
+          </>
+        ),
+        detail: `${r.customerName} · ${r.code}`,
+        time: formatRelative(r.createdAt),
+        amount: <span className="text-navy">{formatIDR(r.amount)}</span>,
+      } satisfies ActivityItem,
+    })),
+    ...o.recentAgents.map((a) => ({
+      at: new Date(a.createdAt).getTime(),
+      item: {
+        id: `a-${a.id}`,
+        icon: UserPlus,
+        tone: (a.status === "pending" ? "amber" : "sky") as Tone,
+        title: <>{a.name} mendaftar sebagai agen</>,
+        detail: `${a.levelName}${a.status === "pending" ? " · menunggu persetujuan" : ""}`,
+        time: formatRelative(a.createdAt),
+      } satisfies ActivityItem,
+    })),
+  ]
+    .sort((x, y) => y.at - x.at)
+    .slice(0, 7)
+    .map((x) => x.item);
+
+  const pending: PendingItem[] = [
+    {
+      href: "/admin/penarikan?status=pending",
+      icon: Banknote,
+      tone: "amber",
+      count: o.withdrawals.pendingCount,
+      title: "Penarikan menunggu",
+      text: o.withdrawals.pendingCount > 0 ? `${formatIDR(o.withdrawals.pendingAmount)} menunggu ditransfer dan diberi bukti.` : "Tidak ada penarikan yang menunggu.",
+      action: "Proses penarikan",
+    },
+    {
+      href: "/admin/agen?status=pending",
+      icon: UserCheck,
+      tone: "sky",
+      count: o.agents.pending,
+      title: "Persetujuan agen",
+      text: o.agents.pending > 0 ? "Pendaftar baru menunggu tinjauan sebelum bisa berjualan." : "Semua pendaftar sudah ditinjau.",
+      action: "Tinjau agen",
+    },
+    {
+      href: "/admin/pesanan?status=pending",
+      icon: ReceiptText,
+      tone: "rose",
+      count: o.orders.pendingCount,
+      title: "Pesanan belum lunas",
+      text: "Komisi dan bonus tim dibagikan setelah pesanan ditandai lunas.",
+      action: "Buka pesanan",
+    },
+  ];
 
   return (
-    <>
-      <PageHeader
-        title={`Halo, ${admin.name.split(" ")[0]}`}
-        description="Ringkasan jaringan agen, penjualan, dan komisi Kerjalin."
-        actions={
-          <Button asChild>
-            <Link href="/admin/pohon">
-              <Network /> Lihat pohon jaringan
-            </Link>
-          </Button>
+    <div className="grid gap-6">
+      <WelcomeBanner
+        title={`Selamat datang, ${admin.name.split(" ")[0]}!`}
+        date={formatToday()}
+        subtitle={
+          p.orders > 0
+            ? `30 hari terakhir: ${p.orders} pesanan lunas, ${formatIDR(agentShare)} dibagikan ke agen.`
+            : "Belum ada pesanan lunas dalam 30 hari terakhir."
         }
+        actions={
+          <>
+            <Button asChild size="lg" className="bg-white text-navy hover:bg-white/90">
+              <Link href="/admin/pesanan">Catat penjualan</Link>
+            </Button>
+            <Button asChild size="lg" variant="ghost" className="border border-white/25 text-white hover:bg-white/10 hover:text-white">
+              <Link href="/admin/produk/baru">Tambah produk</Link>
+            </Button>
+          </>
+        }
+        stats={[
+          { icon: ShoppingBag, label: "Pesanan lunas", value: p.orders, hint: "30 hari terakhir" },
+          { icon: Users, label: "Agen aktif", value: o.agents.active, hint: `${o.agents.total} agen terdaftar` },
+          { icon: Banknote, label: "Omzet 30 hari", value: formatIDR(p.gross), hint: `Dibagikan ke agen ${formatIDR(agentShare)}` },
+          { icon: Percent, label: "Bagian Kerjalin", value: p.gross ? formatPercent(Math.round(adminPercent)) : "-", hint: formatIDR(p.admin) },
+        ]}
       />
 
-      {(o.agents.pending > 0 || o.withdrawals.pendingCount > 0 || o.orders.pendingCount > 0) && (
-        <div className="mb-6 grid gap-3 md:grid-cols-3">
-          {o.agents.pending > 0 && (
-            <ActionAlert href="/admin/agen?status=pending" icon={Users} text={`${o.agents.pending} agen menunggu persetujuan`} />
-          )}
-          {o.withdrawals.pendingCount > 0 && (
-            <ActionAlert
-              href="/admin/penarikan?status=pending"
-              icon={Banknote}
-              text={`${o.withdrawals.pendingCount} penarikan (${formatIDR(o.withdrawals.pendingAmount)}) perlu diproses`}
-            />
-          )}
-          {o.orders.pendingCount > 0 && (
-            <ActionAlert href="/admin/pesanan?status=pending" icon={Hourglass} text={`${o.orders.pendingCount} pesanan belum lunas`} />
-          )}
-        </div>
-      )}
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
+          icon={Banknote}
+          tone="navy"
+          label="Omzet 30 hari"
+          value={formatIDR(p.gross)}
+          hint={`${p.orders} pesanan lunas`}
+          progress={p.gross ? { label: "Bagian Kerjalin", percent: adminPercent } : undefined}
+        />
+        <StatCard
+          icon={Users}
+          tone="sky"
           label="Total agen"
           value={o.agents.total}
-          hint={`${o.agents.active} aktif · ${o.agents.pending} menunggu · ${o.agents.suspended} nonaktif`}
-          icon={Users}
+          hint={`${o.agents.active} aktif · ${o.agents.pending} menunggu`}
+          progress={o.agents.total ? { label: "Agen aktif", percent: (o.agents.active / o.agents.total) * 100 } : undefined}
         />
         <StatCard
-          label="Omzet (pesanan lunas)"
-          value={formatIDR(o.orders.gross)}
-          hint={`${o.orders.paidCount} pesanan lunas`}
           icon={ReceiptText}
-          tone="navy"
+          tone="teal"
+          label="Pesanan lunas"
+          value={o.orders.paidCount}
+          hint={`${o.orders.pendingCount} belum lunas · omzet ${formatIDR(o.orders.gross)}`}
+          progress={orderTotal ? { label: "Sudah lunas", percent: (o.orders.paidCount / orderTotal) * 100 } : undefined}
         />
         <StatCard
-          label="Pendapatan Kerjalin"
-          value={formatIDR(o.orders.adminShare)}
-          hint="Setelah komisi agen dibagikan"
-          icon={CircleDollarSign}
-          tone="green"
-        />
-        <StatCard
+          icon={Wallet}
+          tone="violet"
           label="Saldo agen belum ditarik"
           value={formatIDR(o.wallet.outstanding)}
-          hint={`Total komisi diperoleh ${formatIDR(o.wallet.earned)}`}
-          icon={Wallet}
-          tone="amber"
+          hint={`Sudah dibayarkan ${formatIDR(o.withdrawals.paidAmount)}`}
+          progress={o.wallet.earned > 0 ? { label: "Komisi yang sudah ditarik", percent: withdrawnPercent } : undefined}
         />
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Penjualan 30 hari terakhir</CardTitle>
-            <CardDescription>Omzet dibagi antara komisi agen dan pendapatan Kerjalin.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <StackedAreaChart
-              data={o.daily}
-              series={[
-                { key: "admin", label: "Pendapatan Kerjalin", color: "var(--chart-2)" },
-                { key: "commission", label: "Komisi agen", color: "var(--chart-1)" },
-              ]}
-            />
-          </CardContent>
-        </Card>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+        <Panel
+          title="Omzet harian"
+          description="Setiap hari dibagi antara bagian Kerjalin dan komisi agen."
+          action={<ChartKey series={SERIES} />}
+        >
+          <BarsChart data={o.daily} series={SERIES} className="aspect-auto h-72 w-full" />
+        </Panel>
+
+        <Panel title="Aktivitas terbaru" description="Pesanan dan pendaftar agen">
+          <ActivityList items={activity} empty="Belum ada aktivitas." />
+        </Panel>
+      </div>
+
+      <div className="grid items-start gap-6 xl:grid-cols-2">
+        <Panel title="Aksi cepat" description="Tugas admin yang paling sering">
+          <QuickActions
+            items={[
+              { href: "/admin/produk/baru", icon: PackagePlus, tone: "navy", title: "Tambah produk", text: "Buat produk baru di katalog" },
+              { href: "/admin/pesanan", icon: ReceiptText, tone: "navy", title: "Catat penjualan", text: "Pesanan langsung atau via agen" },
+              { href: "/admin/agen?status=pending", icon: UserCheck, tone: "teal", title: "Setujui agen", text: "Tinjau pendaftar baru" },
+              { href: "/admin/level", icon: Layers, tone: "violet", title: "Atur level", text: "Komisi, bonus tim, dan slot" },
+            ]}
+          />
+        </Panel>
+
+        <Panel
+          title="Agen dengan komisi tertinggi"
+          description="Sejak bergabung"
+          action={
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/admin/agen">
+                Semua agen <ArrowRight />
+              </Link>
+            </Button>
+          }
+        >
+          <RankedList
+            empty="Belum ada data."
+            items={o.topAgents.map((a, i) => ({
+              id: a.id,
+              rank: i + 1,
+              name: a.name,
+              sub: a.levelName,
+              value: formatIDR(a.earned),
+              href: `/admin/agen/${a.id}`,
+              thumb: (
+                <Avatar className="size-11">
+                  {a.image && <AvatarImage src={a.image} alt="" />}
+                  <AvatarFallback className="bg-white text-xs font-bold text-navy">{initials(a.name)}</AvatarFallback>
+                </Avatar>
+              ),
+            }))}
+          />
+        </Panel>
+      </div>
+
+      <section aria-label="Perlu ditindak">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-base font-bold text-navy">Perlu ditindak</h2>
+          {o.withdrawals.pendingCount + o.agents.pending + o.orders.pendingCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-[#c02a47]">
+              <Hourglass className="size-3.5" aria-hidden />
+              {o.withdrawals.pendingCount + o.agents.pending + o.orders.pendingCount} menunggu
+            </span>
+          )}
+        </div>
+        <PendingCards items={pending} />
+      </section>
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.9fr)_minmax(0,1fr)]">
+        <Panel
+          title="Pesanan terbaru"
+          flush
+          action={
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/admin/pesanan">
+                Semua pesanan <ArrowRight />
+              </Link>
+            </Button>
+          }
+        >
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pl-5">Pesanan</TableHead>
+                <TableHead>Agen</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="pr-5 text-right">Total</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {o.recentOrders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                    Belum ada pesanan.
+                  </TableCell>
+                </TableRow>
+              )}
+              {o.recentOrders.map((r) => (
+                <TableRow key={r.id}>
+                  <TableCell className="pl-5">
+                    <p className="font-semibold text-navy">{r.productName}</p>
+                    <p className="max-w-[15rem] truncate text-[0.8125rem] text-muted-foreground">
+                      {r.customerName} · {r.code}
+                    </p>
+                  </TableCell>
+                  <TableCell>{r.sellerName ?? <span className="text-muted-foreground">Langsung</span>}</TableCell>
+                  <TableCell>
+                    <OrderStatusBadge status={r.status} />
+                  </TableCell>
+                  <TableCell className="pr-5 text-right font-medium tabular-nums">{formatIDR(r.amount)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Panel>
 
         <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Agen per level</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              {o.levelDistribution.length === 0 && (
-                <p className="text-sm text-muted-foreground">Belum ada level.</p>
-              )}
+          <Panel title="Ke mana omzet mengalir" description="30 hari terakhir">
+            <SplitBar
+              empty="Belum ada pesanan lunas."
+              segments={[
+                { label: "Kerjalin", value: p.admin, color: "#082052" },
+                { label: "Komisi penjualan agen", value: p.commission, color: "#6b7a9e" },
+                { label: "Bonus tim", value: p.override, color: "#b9c2da" },
+              ]}
+            />
+          </Panel>
+          <Panel title="Agen per level">
+            <ul className="grid gap-3.5">
+              {o.levelDistribution.length === 0 && <li className="text-sm text-muted-foreground">Belum ada level.</li>}
               {o.levelDistribution.map((l) => (
-                <div key={l.id} className="grid gap-1.5">
-                  <div className="flex items-center justify-between text-sm">
+                <li key={l.id} className="grid gap-1.5">
+                  <div className="flex items-center justify-between">
                     <LevelBadge name={l.name} color={l.color} />
-                    <span className="font-bold text-navy tabular-nums">{l.count}</span>
+                    <span className="text-sm font-semibold tabular-nums text-navy">{l.count}</span>
                   </div>
-                  <Progress value={(l.count / maxLevelCount) * 100} className="h-1.5" />
-                </div>
+                  <span className="block h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                    <span className="block h-full rounded-full bg-navy" style={{ width: `${(l.count / maxLevel) * 100}%` }} />
+                  </span>
+                </li>
               ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Agen dengan komisi tertinggi</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3">
-              {o.topAgents.length === 0 && <p className="text-sm text-muted-foreground">Belum ada data.</p>}
-              {o.topAgents.map((a, i) => (
-                <Link
-                  key={a.id}
-                  href={`/admin/agen/${a.id}`}
-                  className="flex items-center gap-3 rounded-lg p-1.5 transition-colors hover:bg-accent"
-                >
-                  <span className="w-4 text-center text-sm font-bold text-muted-foreground">{i + 1}</span>
-                  <Avatar className="size-8">
-                    {a.image && <AvatarImage src={a.image} alt="" />}
-                    <AvatarFallback className="bg-brand/10 text-xs font-bold text-brand">{initials(a.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-navy">{a.name}</p>
-                    <p className="text-xs text-muted-foreground">{a.levelName}</p>
-                  </div>
-                  <span className="text-sm font-bold text-navy tabular-nums">{formatIDR(a.earned)}</span>
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
+            </ul>
+          </Panel>
         </div>
       </div>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.7fr_1fr]">
-        <Card>
-          <CardHeader>
-              <CardTitle>Pesanan terbaru</CardTitle>
-              <CardAction>
-                <Button asChild variant="ghost" size="sm">
-              <Link href="/admin/pesanan">
-                Semua <ArrowUpRight />
-              </Link>
-            </Button>
-              </CardAction>
-            </CardHeader>
-          <CardContent className="px-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="pl-6">Pesanan</TableHead>
-                  <TableHead>Agen</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="pr-6 text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {o.recentOrders.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="py-8 text-center text-muted-foreground">
-                      Belum ada pesanan.
-                    </TableCell>
-                  </TableRow>
-                )}
-                {o.recentOrders.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="pl-6">
-                      <p className="font-semibold text-navy">{r.productName}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {r.code} · {r.customerName}
-                      </p>
-                    </TableCell>
-                    <TableCell className="text-sm">{r.sellerName ?? <span className="text-muted-foreground">Langsung</span>}</TableCell>
-                    <TableCell>
-                      <OrderStatusBadge status={r.status} />
-                    </TableCell>
-                    <TableCell className="pr-6 text-right font-semibold tabular-nums">{formatIDR(r.amount)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-              <CardTitle>Pendaftar terbaru</CardTitle>
-              <CardAction>
-                <Button asChild variant="ghost" size="sm">
-              <Link href="/admin/agen">
-                Semua <ArrowUpRight />
-              </Link>
-            </Button>
-              </CardAction>
-            </CardHeader>
-          <CardContent className="grid gap-3">
-            {o.recentAgents.length === 0 && <p className="text-sm text-muted-foreground">Belum ada agen.</p>}
-            {o.recentAgents.map((a) => (
-              <Link
-                key={a.id}
-                href={`/admin/agen/${a.id}`}
-                className="flex items-center gap-3 rounded-lg p-1.5 transition-colors hover:bg-accent"
-              >
-                <Avatar className="size-9">
-                  {a.image && <AvatarImage src={a.image} alt="" />}
-                  <AvatarFallback className="bg-brand/10 text-xs font-bold text-brand">{initials(a.name)}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-navy">{a.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {a.levelName} · {formatDate(a.createdAt)}
-                  </p>
-                </div>
-                <AgentStatusBadge status={a.status} />
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
-}
-
-function ActionAlert({
-  href,
-  icon: Icon,
-  text,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  text: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-3 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-semibold text-navy transition-colors hover:bg-warning/15"
-    >
-      <Icon className="size-4.5 text-warning" />
-      <span className="flex-1">{text}</span>
-      <ArrowUpRight className="size-4 text-warning" />
-    </Link>
+    </div>
   );
 }
