@@ -16,7 +16,8 @@
     "db:seed:demo": "tsx --conditions=react-server --env-file=.env.local scripts/seed.ts --demo",
     "db:seed:demo:clean": "tsx --conditions=react-server --env-file=.env.local scripts/seed.ts --clean-demo",
     "db:seed:me": "tsx --conditions=react-server --env-file=.env.local scripts/seed-me.ts",
-    "db:seed:me:clean": "tsx --conditions=react-server --env-file=.env.local scripts/seed-me.ts --clean"
+    "db:seed:me:clean": "tsx --conditions=react-server --env-file=.env.local scripts/seed-me.ts --clean",
+    "deploy:check": "tsx --conditions=react-server scripts/check-deploy.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
@@ -50,5 +51,8 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

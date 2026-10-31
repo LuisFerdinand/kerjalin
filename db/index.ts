@@ -15,7 +15,13 @@ function createDb() {
     );
   }
   const globalForDb = globalThis as unknown as { __kerjalinPool?: Pool };
-  globalForDb.__kerjalinPool ??= new Pool({ connectionString: url });
+  // Pool kecil: tiap instance serverless hanya butuh beberapa koneksi, dan Neon pooler membagi sisanya.
+  globalForDb.__kerjalinPool ??= new Pool({
+    connectionString: url,
+    max: 5,
+    idleTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 10_000,
+  });
   return drizzle(globalForDb.__kerjalinPool, { schema });
 }
 

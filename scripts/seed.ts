@@ -6,6 +6,7 @@
  *   npm run db:seed:demo:clean   → menghapus data demo
  *
  * Opsi tambahan: --reset-admin-password  (setel ulang password Super Admin dari .env.local)
+ *                 --no-catalog            (lewati produk dan kategori contoh, untuk produksi)
  */
 import { randomUUID } from "node:crypto";
 import { hashPassword } from "better-auth/crypto";
@@ -21,6 +22,7 @@ import {
   walletEntries,
 } from "@/db/schema";
 import { createAgentProfile, createOrder, markOrderPaid } from "@/lib/mlm";
+import { refuseDemoInProduction } from "./guard";
 import { seedCatalog } from "./seed-catalog";
 
 const args = new Set(process.argv.slice(2));
@@ -149,6 +151,7 @@ async function createDemoUser(name: string, handle: string, password: string) {
 }
 
 async function seedDemo() {
+  refuseDemoInProduction(args.has("--allow-production"));
   const [already] = await db.select({ id: user.id }).from(user).where(like(user.email, `%${DEMO_DOMAIN}`)).limit(1);
   if (already) {
     console.log("• Data demo sudah ada. Jalankan `npm run db:seed:demo:clean` dulu bila ingin membuat ulang.");
@@ -242,7 +245,8 @@ async function main() {
   }
   await seedLevels();
   await seedSuperAdmin();
-  await seedCatalog();
+  // Produksi: --no-catalog agar tidak membuat produk contoh; isi katalog lewat panel admin.
+  if (!args.has("--no-catalog")) await seedCatalog();
   if (args.has("--demo")) await seedDemo();
 }
 

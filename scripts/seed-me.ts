@@ -24,6 +24,7 @@ import {
   cancelOrder,
   requestWithdrawal,
 } from "@/lib/mlm";
+import { refuseDemoInProduction } from "./guard";
 import { seedCatalog } from "./seed-catalog";
 
 const argv = process.argv.slice(2);
@@ -307,7 +308,10 @@ async function seed() {
 
 async function main() {
   if (argv.includes("--clean")) await clean();
-  else await seed();
+  else {
+    refuseDemoInProduction(argv.includes("--allow-production"));
+    await seed();
+  }
 }
 
 main()

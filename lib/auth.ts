@@ -4,14 +4,24 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
-import { siteConfig } from "@/lib/config";
+import { siteConfig, trustedOrigins } from "@/lib/config";
 
 const googleEnabled = Boolean(
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
 );
 
+const isBuild = process.env.NEXT_PHASE === "phase-production-build";
+
+// Tanpa secret, sesi tidak aman dan login gagal dengan pesan yang membingungkan.
+// Dicek saat server berjalan, bukan saat build, supaya build di CI tidak butuh rahasia.
+if (process.env.NODE_ENV === "production" && !isBuild && !process.env.BETTER_AUTH_SECRET) {
+  throw new Error(
+    "BETTER_AUTH_SECRET belum diisi. Isi di Vercel → Settings → Environment Variables (buat dengan: openssl rand -base64 32).",
+  );
+}
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? siteConfig.url,
+  baseURL: siteConfig.url,
   secret: process.env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -22,11 +32,9 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
-  // Saat development, izinkan port lokal lain (mis. bila 3000 sedang terpakai).
-  trustedOrigins:
-    process.env.NODE_ENV === "production"
-      ? []
-      : ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+  // Alamat yang boleh memanggil API login: domain situs, domain produksi dan preview Vercel,
+  // varian www, dan AUTH_TRUSTED_ORIGINS. Lihat lib/config.ts.
+  trustedOrigins: trustedOrigins(),
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,

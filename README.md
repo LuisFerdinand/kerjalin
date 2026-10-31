@@ -44,7 +44,9 @@ terakhir lengkap dengan komisi dan bonus tim, tiga penarikan, serta katalog cont
 | --- | --- | --- |
 | `DATABASE_URL` | ya | Connection string Neon (pakai host `-pooler`, `sslmode=require`) |
 | `BETTER_AUTH_SECRET` | ya | Acak & rahasia. Buat: `openssl rand -base64 32` |
-| `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL` | ya | URL situs, mis. `http://localhost:3000` |
+| `NEXT_PUBLIC_APP_URL` | ya | URL situs, mis. `http://localhost:3000`. Di Vercel isi domain produksi (`https://kerjalin.id`) |
+| `BETTER_AUTH_URL` | tidak | Bila diisi, samakan dengan `NEXT_PUBLIC_APP_URL`. Di Vercel tidak perlu |
+| `AUTH_TRUSTED_ORIGINS` | tidak | Alamat tambahan yang boleh memanggil API login, dipisah koma |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | opsional | Tombol "Masuk dengan Google" muncul bila keduanya terisi |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_FOLDER` | opsional | Upload gambar produk & bukti transfer |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_CONTACT_EMAIL` | opsional | Kontak di footer & halaman produk |
@@ -79,7 +81,93 @@ sehingga API secret tidak pernah sampai ke browser. Tanpa Cloudinary, kamu tetap
 | `npm run db:studio` | Drizzle Studio |
 | `npm run db:seed` | Seed dasar (aman diulang). `-- --reset-admin-password` untuk reset password admin |
 | `npm run db:seed:demo` / `db:seed:demo:clean` | Tambah / hapus data demo |
+| `npm run deploy:check` | Periksa variabel, database, dan kesiapan sebelum deploy. `-- --env=berkas` memakai berkas lain |
 | `npm run db:seed:me` / `db:seed:me:clean` | Isi / bersihkan dashboard satu akun agen dengan data contoh |
+
+## Deploy ke Vercel
+
+Alur singkat: **database produksi → migrasi dan seed → variabel di Vercel → deploy → cek**. Konfigurasi proyek
+sudah disiapkan: `vercel.json` memilih region Singapura (`sin1`, dekat database Neon `ap-southeast-1`), `package.json`
+meminta Node 22 atau lebih baru, dan situs mengirim header keamanan standar.
+
+### 1. Database produksi
+
+Buat database Neon **terpisah** untuk produksi (project baru, atau branch dari project yang sama), region
+*Singapore*, lalu ambil connection string yang **pooled** (host berisi `-pooler`) dengan `sslmode=require`.
+
+> Jangan memakai database pengembangan untuk produksi bila pernah menjalankan `db:seed:demo` atau `db:seed:me`.
+> Akun `@demo.kerjalin.test` berpassword umum (`DemoKerjalin123`), sehingga siapa pun bisa masuk memakainya.
+> Skrip seed data contoh sengaja menolak berjalan bila `NEXT_PUBLIC_APP_URL` bukan localhost.
+
+### 2. Migrasi dan akun admin pertama
+
+Jalankan dari komputermu. Nilai di shell menang atas `.env.local`, jadi database dev tidak tersentuh.
+Contoh PowerShell:
+
+```powershell
+$env:DATABASE_URL = "postgresql://USER:PASS@ep-xxxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+npm run db:migrate
+
+$env:SEED_ADMIN_NAME = "Nama Kamu"
+$env:SEED_ADMIN_EMAIL = "kamu@email.com"
+$env:SEED_ADMIN_PASSWORD = "password-kuat-minimal-12-karakter"
+npm run db:seed -- --no-catalog     # level agen + Super Admin, tanpa produk contoh
+```
+
+Contoh bash: `DATABASE_URL="..." npm run db:migrate`. Hilangkan `--no-catalog` bila ingin memulai dari
+katalog contoh. Produk sungguhan ditambahkan lewat **Admin → Produk**.
+
+### 3. Proyek di Vercel
+
+Import repositori, biarkan *Framework Preset* **Next.js**, lalu isi **Settings → Environment Variables**
+(scope *Production*, dan *Preview* bila preview deployment ingin dipakai login):
+
+| Variabel | Wajib | Nilai |
+| --- | --- | --- |
+| `DATABASE_URL` | ya | Connection string pooled dari langkah 1 |
+| `BETTER_AUTH_SECRET` | ya | Acak, minimal 32 karakter: `openssl rand -base64 32`. **Jangan diganti-ganti**: mengubahnya mengeluarkan semua orang dari sesi |
+| `NEXT_PUBLIC_APP_URL` | disarankan | `https://domain-kamu`. Bila kosong, Vercel memakai domain produksi proyek |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | disarankan | Mis. `6281234567890`; mengaktifkan tombol WhatsApp di halaman produk dan pesanan |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | opsional | Email kontak di footer |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_FOLDER` | opsional | Unggah gambar produk dan bukti transfer |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | opsional | Tombol "Masuk dengan Google" |
+| `AUTH_TRUSTED_ORIGINS` | opsional | Domain tambahan, dipisah koma, bila situs bisa dibuka lewat lebih dari satu alamat |
+
+Tidak perlu diisi di Vercel: `BETTER_AUTH_URL` dan `SEED_ADMIN_*`. Variabel `NEXT_PUBLIC_*` ikut tertanam saat
+build, jadi **deploy ulang** setelah mengubahnya.
+
+Alamat yang dikenali untuk login dibaca otomatis dari Vercel: domain produksi, alamat deployment, alamat branch,
+dan varian `www`. Preview deployment memakai alamatnya sendiri, jadi login di preview tidak melompat ke domain produksi.
+
+### 4. Periksa sebelum dan sesudah deploy
+
+```bash
+vercel env pull .env.production.local --environment=production
+npm run deploy:check -- --env=.env.production.local
+```
+
+`deploy:check` memeriksa variabel, koneksi database, tabel, migrasi, Super Admin, level agen, dan sisa akun demo
+tanpa mencetak rahasia. Setelah deploy, buka `https://domain-kamu/api/health`: hasil `{"ok":true,"database":"ok"}`
+berarti fungsi Vercel bisa menjangkau database. Lalu masuk di `/masuk` dengan akun admin dari langkah 2.
+
+### 5. Domain sendiri
+
+Tambahkan domain di **Settings → Domains**, ubah `NEXT_PUBLIC_APP_URL` ke domain itu, lalu deploy ulang. Bila memakai
+Google, tambahkan `https://DOMAIN/api/auth/callback/google` di Authorized redirect URIs (Google tidak menerima domain
+wildcard, jadi login Google tidak berlaku di preview deployment; login email dan password tetap bisa).
+
+### Bila login bermasalah
+
+| Gejala | Penyebab dan perbaikan |
+| --- | --- |
+| Pesan "Invalid origin" (403) di log, atau tombol Masuk tidak bereaksi | Alamat yang dipakai membuka situs belum dikenali. Isi `NEXT_PUBLIC_APP_URL` dengan alamat itu, atau tambahkan ke `AUTH_TRUSTED_ORIGINS`, lalu deploy ulang |
+| Berhasil masuk lalu kembali ke `/masuk` | `BETTER_AUTH_SECRET` berbeda antara build dan runtime, atau tidak terisi di scope yang dipakai (Production vs Preview) |
+| Error 500 setelah masuk | Database belum dimigrasi. Jalankan `npm run db:migrate` ke database produksi dan cek `/api/health` |
+| "Terlalu banyak percobaan" (429) | Pembatas bawaan: sekitar 3 percobaan masuk per 10 detik per alamat IP. Tunggu sebentar |
+| Lupa password admin | `npm run db:seed -- --reset-admin-password --no-catalog` dengan `DATABASE_URL`, `SEED_ADMIN_EMAIL`, dan `SEED_ADMIN_PASSWORD` di shell |
+| Preview deployment meminta login Vercel | Itu *Deployment Protection* milik Vercel, bukan aplikasi. Atur di Settings → Deployment Protection |
+
+Belum ada fitur "lupa password" lewat email; pengaturan ulang dilakukan admin lewat skrip di atas.
 
 ## Checkout pelanggan
 
