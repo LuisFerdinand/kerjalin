@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useLayoutEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -20,12 +20,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 import { NAV, isActive, type NavItem, type Variant } from "./nav";
-import { SignOutButton, UserMenu, type UserMenuUser } from "./user-menu";
+import { SignOutButton } from "./user-menu";
 
 /** Ingat pilihan ciut/terbuka dari kunjungan sebelumnya (cookie ditulis oleh SidebarProvider). */
 function SidebarMemory() {
   const { setOpen } = useSidebar();
-  useEffect(() => {
+  // Sebelum browser menggambar, supaya sidebar tidak sempat tampil terbuka lalu menciut.
+  useLayoutEffect(() => {
     const saved = document.cookie.split("; ").find((c) => c.startsWith("sidebar_state="));
     if (saved?.endsWith("=false")) setOpen(false);
     // Hanya saat pertama dimuat.
@@ -84,9 +85,13 @@ function NavLink({ item, active, count }: { item: NavItem; active: boolean; coun
                   <span className="sr-only">{item.badgeLabel}: </span>
                   {count}
                 </span>
+                {/* Titik di pojok kanan atas ikon (bukan di atasnya). Cincinnya mengikuti warna latar tab. */}
                 <span
                   aria-hidden
-                  className="absolute top-2 right-2.5 hidden size-2.5 rounded-full bg-rose-400 ring-2 ring-sidebar group-data-[collapsible=icon]:block"
+                  className={cn(
+                    "absolute top-[7px] left-1/2 z-10 ml-[3px] hidden size-2.5 rounded-full bg-rose-400 ring-2 group-data-[collapsible=icon]:block",
+                    active ? "ring-white" : "ring-sidebar",
+                  )}
                 />
               </>
             )}
@@ -128,15 +133,7 @@ function ActiveNavGroups(props: { variant: Variant; badges: Record<string, numbe
   return <NavGroups {...props} pathname={pathname} />;
 }
 
-export function AppSidebar({
-  variant,
-  user,
-  badges = {},
-}: {
-  variant: Variant;
-  user: UserMenuUser | null;
-  badges?: Record<string, number>;
-}) {
+export function AppSidebar({ variant, badges = {} }: { variant: Variant; badges?: Record<string, number> }) {
   return (
     <Sidebar
       variant="sidebar"
@@ -145,7 +142,8 @@ export function AppSidebar({
     >
       <SidebarMemory />
 
-      <SidebarHeader className="px-5 pt-5 pb-2 group-data-[collapsible=icon]:px-2">
+      {/* Saat diciutkan, header dan footer memakai jarak yang sama dengan daftar menu (8px kiri, 0 kanan) supaya ikon sejajar. */}
+      <SidebarHeader className="px-5 pt-5 pb-2 group-data-[collapsible=icon]:pr-0 group-data-[collapsible=icon]:pl-2">
         <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-3">
           <Link
             href={variant === "admin" ? "/admin" : "/dashboard"}
@@ -162,15 +160,14 @@ export function AppSidebar({
         </div>
       </SidebarHeader>
 
-      <UserMenu user={user} variant={variant} />
-
-      <SidebarContent className="mt-2 gap-0 overflow-x-hidden">
+      {/* Saat diciutkan, isi dipotong di tepinya; ruang di atas menampung lengkung tab bila menu pertama aktif. */}
+      <SidebarContent className="mt-2 gap-0 overflow-x-hidden group-data-[collapsible=icon]:pt-8">
         <Suspense fallback={<NavGroups variant={variant} badges={badges} pathname={null} />}>
           <ActiveNavGroups variant={variant} badges={badges} />
         </Suspense>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-white/10 p-3 group-data-[collapsible=icon]:px-2">
+      <SidebarFooter className="border-t border-white/10 p-3 group-data-[collapsible=icon]:pr-0 group-data-[collapsible=icon]:pl-2">
         <SignOutButton />
       </SidebarFooter>
     </Sidebar>

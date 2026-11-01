@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
 import { initials } from "@/lib/format";
@@ -43,7 +42,7 @@ export function SignOutButton() {
       type="button"
       onClick={signOut}
       title="Keluar"
-      className="flex h-11 w-full items-center gap-3 rounded-xl px-4 text-[0.9375rem] font-medium text-sidebar-foreground transition-colors hover:bg-white/10 hover:text-white group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+      className="flex h-11 w-full items-center gap-3 rounded-xl px-4 text-[0.9375rem] font-medium text-sidebar-foreground transition-colors hover:bg-white/10 hover:text-white group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-r-none group-data-[collapsible=icon]:px-0"
     >
       <LogOut className="size-[18px] shrink-0" strokeWidth={1.7} aria-hidden />
       <span className="group-data-[collapsible=icon]:hidden">Keluar</span>
@@ -51,49 +50,53 @@ export function SignOutButton() {
   );
 }
 
-/** Kartu profil di bagian atas sidebar: foto, nama, dan email. Klik untuk membuka menu akun. */
-export function UserMenu({ user, variant }: { user: UserMenuUser | null; variant: "admin" | "agent" }) {
-  const { isMobile } = useSidebar();
-  const signOut = useSignOut();
+function UserAvatar({ user, className }: { user: UserMenuUser; className?: string }) {
+  return (
+    <Avatar className={className}>
+      {user.image && <AvatarImage src={user.image} alt="" />}
+      <AvatarFallback className="bg-navy text-xs font-bold text-white">{initials(user.name)}</AvatarFallback>
+    </Avatar>
+  );
+}
 
-  if (!user) {
-    return (
-      <div className="grid justify-items-center gap-2 px-4 py-3 group-data-[collapsible=icon]:px-1">
-        <Skeleton className="size-14 rounded-full bg-white/15 group-data-[collapsible=icon]:size-9" />
-        <Skeleton className="h-4 w-28 bg-white/15 group-data-[collapsible=icon]:hidden" />
-        <Skeleton className="h-3 w-36 bg-white/10 group-data-[collapsible=icon]:hidden" />
-      </div>
-    );
-  }
+/** Placeholder selama data akun dimuat, seukuran tombol akun supaya bilah atas tidak bergeser. */
+export function AccountMenuSkeleton() {
+  return <Skeleton className="h-10 w-10 rounded-xl lg:w-48" />;
+}
+
+/**
+ * Menu akun di ujung kanan bilah atas: foto, nama, dan peran. Klik untuk melihat email, membuka profil,
+ * kembali ke beranda, atau keluar.
+ */
+export function AccountMenu({ user, variant }: { user: UserMenuUser; variant: "admin" | "agent" }) {
+  const signOut = useSignOut();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          title={user.name}
-          className="group/profile mx-3 grid justify-items-center gap-1 rounded-2xl px-3 py-3 text-center outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/60 data-[state=open]:bg-white/10 group-data-[collapsible=icon]:mx-1 group-data-[collapsible=icon]:px-0"
+          aria-label={`Menu akun ${user.name}`}
+          className="flex h-10 items-center gap-2.5 rounded-xl border border-border py-1 pr-2 pl-1 text-left outline-none transition-colors hover:border-navy/40 hover:bg-muted focus-visible:ring-2 focus-visible:ring-navy/30 data-[state=open]:border-navy/40 data-[state=open]:bg-muted lg:pr-3"
         >
-          <Avatar className="size-14 ring-2 ring-white/30 group-data-[collapsible=icon]:size-9">
-            {user.image && <AvatarImage src={user.image} alt="" />}
-            <AvatarFallback className="bg-white text-base font-bold text-navy group-data-[collapsible=icon]:text-xs">
-              {initials(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="mt-1.5 flex max-w-full items-center gap-1 text-sm font-semibold text-white group-data-[collapsible=icon]:hidden">
-            <span className="truncate">{user.name}</span>
-            <ChevronDown className="size-3.5 shrink-0 text-white/60" aria-hidden />
+          <UserAvatar user={user} className="size-8" />
+          <span className="hidden min-w-0 leading-tight lg:block">
+            <span className="block max-w-36 truncate text-sm font-semibold text-navy">{user.name}</span>
+            <span className="block max-w-36 truncate text-xs text-muted-foreground">{user.caption}</span>
           </span>
-          <span className="max-w-full truncate text-xs text-sidebar-foreground/80 group-data-[collapsible=icon]:hidden">{user.email}</span>
-          <span className="mt-1 rounded-full bg-white/12 px-2.5 py-0.5 text-[0.6875rem] font-semibold text-white group-data-[collapsible=icon]:hidden">
-            {user.caption}
-          </span>
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-56 rounded-xl" side={isMobile ? "bottom" : "right"} align="start" sideOffset={8}>
-        <DropdownMenuLabel className="font-normal">
-          <p className="truncate text-sm font-semibold text-navy">{user.name}</p>
-          <p className="truncate text-[0.8125rem] text-muted-foreground">{user.email}</p>
+      <DropdownMenuContent className="min-w-64 rounded-xl" align="end" sideOffset={8}>
+        <DropdownMenuLabel className="flex items-center gap-3 p-2 font-normal">
+          <UserAvatar user={user} className="size-10" />
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-navy">{user.name}</span>
+            <span className="block truncate text-[0.8125rem] text-muted-foreground">{user.email}</span>
+            <span className="mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[0.6875rem] font-semibold text-navy">
+              {user.caption}
+            </span>
+          </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {variant === "agent" && (

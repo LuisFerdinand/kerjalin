@@ -263,6 +263,11 @@ export const products = pgTable(
 export const ORDER_STATUSES = ["pending", "paid", "cancelled", "refunded"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
+/** Metode bayar di checkout: dua payment gateway dan QRIS yang diverifikasi admin secara manual. */
+export const PAYMENT_METHOD_KEYS = ["midtrans", "xendit", "qris"] as const;
+export type PaymentMethodKey = (typeof PAYMENT_METHOD_KEYS)[number];
+export type PaymentMode = "sandbox" | "production";
+
 export const orders = pgTable(
   "orders",
   {
@@ -284,6 +289,20 @@ export const orders = pgTable(
     adminAmount: bigint("admin_amount", { mode: "number" }).notNull().default(0),
     status: text("status").$type<OrderStatus>().notNull().default("pending"),
     note: text("note"),
+    /** Metode bayar yang dipilih pelanggan. null = belum memilih (dikonfirmasi lewat WhatsApp / dicatat admin). */
+    paymentMethod: text("payment_method").$type<PaymentMethodKey>(),
+    /**
+     * Referensi transaksi terakhir di sisi gateway (order_id Midtrans / external_id Xendit), berbentuk
+     * "<kode pesanan>_<acak>". Berganti bila pelanggan memulai ulang pembayaran.
+     */
+    paymentRef: text("payment_ref"),
+    /** Tautan halaman bayar gateway untuk transaksi terakhir. */
+    paymentUrl: text("payment_url"),
+    paymentExpiresAt: timestamp("payment_expires_at"),
+    /** QRIS manual: pelanggan menyatakan sudah membayar dan menunggu verifikasi admin. */
+    paymentSubmittedAt: timestamp("payment_submitted_at"),
+    /** Catatan pelanggan saat konfirmasi QRIS, mis. nama pemilik rekening / e-wallet pengirim. */
+    paymentNote: text("payment_note"),
     paidAt: timestamp("paid_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -295,7 +314,53 @@ export const orders = pgTable(
     index("orders_agent_idx").on(t.agentId),
     index("orders_status_idx").on(t.status),
     index("orders_created_idx").on(t.createdAt),
+    uniqueIndex("orders_payment_ref_uq").on(t.paymentRef),
   ],
+);
+
+/* -------------------------------------------------------------------------- */
+/*  Pembayaran                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/** Satu baris per metode bayar. Diatur Super Admin di /admin/pembayaran. */
+export const paymentMethods = pgTable("payment_methods", {
+  key: text("key").$type<PaymentMethodKey>().primaryKey(),
+  enabled: boolean("enabled").notNull().default(false),
+  /** Lingkungan uji atau produksi. Dipakai gateway yang memisahkan keduanya (Midtrans). */
+  mode: text("mode").$type<PaymentMode>().notNull().default("sandbox"),
+  /** Kredensial gateway sebagai JSON terenkripsi (AES-256-GCM). Tidak pernah dikirim ke browser. */
+  credentials: text("credentials"),
+  /** Pengaturan yang tidak rahasia, mis. nama merchant dan petunjuk untuk QRIS. */
+  settings: jsonb("settings").$type<Record<string, string>>().notNull().default({}),
+  updatedBy: text("updated_by").references(() => user.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const PAYMENT_FILE_KINDS = ["qris", "proof"] as const;
+export type PaymentFileKind = (typeof PAYMENT_FILE_KINDS)[number];
+
+/**
+ * Gambar yang disimpan di database agar alur QRIS tidak bergantung pada layanan lain:
+ * gambar QRIS milik admin (`qris`, satu baris terbaru yang dipakai) dan bukti bayar pelanggan (`proof`).
+ * Isi disimpan sebagai base64 dan dilayani lewat route handler, bukan lewat kolom pesanan,
+ * supaya daftar pesanan tidak ikut menarik gambar.
+ */
+export const paymentFiles = pgTable(
+  "payment_files",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    kind: text("kind").$type<PaymentFileKind>().notNull(),
+    orderId: uuid("order_id").references(() => orders.id, { onDelete: "cascade" }),
+    mime: text("mime").notNull(),
+    size: integer("size").notNull(),
+    /** Isi berkas dalam base64, tanpa awalan "data:". */
+    data: text("data").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (t) => [index("payment_files_order_idx").on(t.orderId), index("payment_files_kind_idx").on(t.kind, t.createdAt)],
 );
 
 /* -------------------------------------------------------------------------- */
@@ -382,5 +447,6 @@ export type AgentLevel = typeof agentLevels.$inferSelect;
 export type Product = typeof products.$inferSelect;
 export type Category = typeof categories.$inferSelect;
 export type Order = typeof orders.$inferSelect;
+export type PaymentMethodRow = typeof paymentMethods.$inferSelect;
 export type Withdrawal = typeof withdrawals.$inferSelect;
 export type WalletEntry = typeof walletEntries.$inferSelect;

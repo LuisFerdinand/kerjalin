@@ -95,6 +95,10 @@ export async function getOrderByCode(code: string) {
       createdAt: orders.createdAt,
       customerName: orders.customerName,
       sellerName: user.name,
+      paymentMethod: orders.paymentMethod,
+      paymentUrl: orders.paymentUrl,
+      paymentExpiresAt: orders.paymentExpiresAt,
+      paymentSubmittedAt: orders.paymentSubmittedAt,
     })
     .from(orders)
     .leftJoin(products, eq(orders.productId, products.id))
@@ -102,5 +106,9 @@ export async function getOrderByCode(code: string) {
     .leftJoin(user, eq(agents.userId, user.id))
     .where(eq(orders.code, code.trim().toUpperCase()))
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+  /** Tautan bayar gateway sudah tidak ada, atau lewat masa berlakunya. */
+  const paymentLinkExpired =
+    !row.paymentUrl || (row.paymentExpiresAt !== null && row.paymentExpiresAt.getTime() < Date.now());
+  return { ...row, paymentLinkExpired };
 }

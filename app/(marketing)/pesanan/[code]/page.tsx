@@ -5,10 +5,13 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, Circle, CircleDot, MessageCircle, XCircle } from "lucide-react";
 import { CopyButton } from "@/components/app/copy-button";
 import { Rise } from "@/components/marketing/rise";
+import { PaymentPanel } from "@/components/payment/payment-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { whatsappLink } from "@/lib/config";
 import { formatDateTime, formatIDR } from "@/lib/format";
+import { getQrisDisplay, listCheckoutMethods } from "@/lib/payments/service";
 import { getOrderByCode } from "@/lib/queries/public";
+import { first } from "@/lib/search-params";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -27,43 +30,78 @@ export default function OrderPage(props: PageProps<"/pesanan/[code]">) {
   return (
     <div className="mx-auto w-full max-w-[860px] px-4 pt-8 pb-24 sm:px-6 lg:pt-14 lg:pb-32">
       <Suspense fallback={<Skeleton className="h-[520px] rounded-3xl" />}>
-        <Content params={props.params} />
+        <Content params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function Content({ params }: { params: PageProps<"/pesanan/[code]">["params"] }) {
+async function Content({
+  params,
+  searchParams,
+}: {
+  params: PageProps<"/pesanan/[code]">["params"];
+  searchParams: PageProps<"/pesanan/[code]">["searchParams"];
+}) {
   const { code } = await params;
-  const order = await getOrderByCode(code);
+  const sp = await searchParams;
+  const [order, methods, qris] = await Promise.all([getOrderByCode(code), listCheckoutMethods(), getQrisDisplay()]);
   if (!order) notFound();
 
   const closed = order.status === "cancelled" || order.status === "refunded";
   const paid = order.status === "paid";
+  const pending = order.status === "pending";
   const status = STATUS[order.status];
   const firstName = order.customerName.split(/[\s(]/)[0];
   const wa = whatsappLink(`Halo Kerjalin, saya ingin konfirmasi pembayaran untuk pesanan ${order.code}.`);
 
-  const steps = [
-    { title: "Pesanan tercatat", text: `Kode pesananmu ${order.code}. Simpan kode ini.`, state: "done" as const },
-    {
-      title: "Instruksi pembayaran",
-      text: order.sellerName
-        ? `Agen ${order.sellerName} atau tim Kerjalin menghubungi WhatsAppmu untuk instruksi pembayaran.`
-        : "Tim Kerjalin menghubungi WhatsAppmu untuk instruksi pembayaran.",
-      state: paid ? ("done" as const) : closed ? ("off" as const) : ("now" as const),
-    },
-    {
-      title: "Pembayaran dikonfirmasi",
-      text: "Admin menandai pesanan lunas setelah pembayaran diterima.",
-      state: paid ? ("done" as const) : ("off" as const),
-    },
-    {
-      title: "Layanan aktif",
-      text: "Kamu mendapat akses dan panduan memulai dari tim Kerjalin.",
-      state: paid ? ("now" as const) : ("off" as const),
-    },
-  ];
+  const method = order.paymentMethod;
+  const isQris = method === "qris";
+  /** Halaman menawarkan pembayaran di tempat: ada metode aktif, atau pelanggan sudah memilih satu. */
+  const payOnSite = methods.length > 0 || method !== null;
+  const submitted = order.paymentSubmittedAt !== null;
+
+  const steps = payOnSite
+    ? [
+        { title: "Pesanan tercatat", text: `Kode pesananmu ${order.code}. Simpan kode ini.`, state: "done" as const },
+        {
+          title: isQris ? "Scan QRIS dan bayar" : "Bayar",
+          text: isQris
+            ? "Scan QRIS di halaman ini dan bayar sesuai total, lalu kirim konfirmasi."
+            : "Selesaikan pembayaran lewat metode yang kamu pilih.",
+          state: paid ? ("done" as const) : closed ? ("off" as const) : isQris && submitted ? ("done" as const) : ("now" as const),
+        },
+        {
+          title: "Pembayaran dikonfirmasi",
+          text: isQris ? "Admin memeriksa pembayaranmu lalu menandai pesanan lunas." : "Pesanan otomatis lunas begitu pembayaran berhasil.",
+          state: paid ? ("done" as const) : closed ? ("off" as const) : isQris && submitted ? ("now" as const) : ("off" as const),
+        },
+        {
+          title: "Layanan aktif",
+          text: "Kamu mendapat akses dan panduan memulai dari tim Kerjalin.",
+          state: paid ? ("now" as const) : ("off" as const),
+        },
+      ]
+    : [
+        { title: "Pesanan tercatat", text: `Kode pesananmu ${order.code}. Simpan kode ini.`, state: "done" as const },
+        {
+          title: "Instruksi pembayaran",
+          text: order.sellerName
+            ? `Agen ${order.sellerName} atau tim Kerjalin menghubungi WhatsAppmu untuk instruksi pembayaran.`
+            : "Tim Kerjalin menghubungi WhatsAppmu untuk instruksi pembayaran.",
+          state: paid ? ("done" as const) : closed ? ("off" as const) : ("now" as const),
+        },
+        {
+          title: "Pembayaran dikonfirmasi",
+          text: "Admin menandai pesanan lunas setelah pembayaran diterima.",
+          state: paid ? ("done" as const) : ("off" as const),
+        },
+        {
+          title: "Layanan aktif",
+          text: "Kamu mendapat akses dan panduan memulai dari tim Kerjalin.",
+          state: paid ? ("now" as const) : ("off" as const),
+        },
+      ];
 
   return (
     <>
@@ -80,7 +118,9 @@ async function Content({ params }: { params: PageProps<"/pesanan/[code]">["param
               ? "Hubungi tim Kerjalin bila kamu merasa ini keliru."
               : paid
                 ? "Pembayaranmu sudah dikonfirmasi. Tim Kerjalin akan membantu kamu memulai."
-                : "Belum ada pembayaran yang perlu dilakukan sekarang. Tunggu pesan WhatsApp dari kami berisi cara membayar."}
+                : payOnSite
+                  ? "Satu langkah lagi: selesaikan pembayaran di bawah agar pesananmu diproses."
+                  : "Belum ada pembayaran yang perlu dilakukan sekarang. Tunggu pesan WhatsApp dari kami berisi cara membayar."}
           </p>
         </div>
       </Rise>
@@ -123,6 +163,25 @@ async function Content({ params }: { params: PageProps<"/pesanan/[code]">["param
             </div>
           </dl>
 
+          {pending && payOnSite && (
+            <div className="border-t border-border p-5 sm:p-6">
+              <PaymentPanel
+                order={{
+                  code: order.code,
+                  amount: order.amount,
+                  method,
+                  paymentUrl: order.paymentUrl,
+                  linkExpired: order.paymentLinkExpired,
+                  submittedAt: order.paymentSubmittedAt?.toISOString() ?? null,
+                }}
+                methods={methods}
+                qris={qris ? { imageUrl: `/api/payments/qris?v=${qris.imageId}`, merchantName: qris.merchantName, instructions: qris.instructions } : null}
+                returning={first(sp.kembali) === "1"}
+                startFailed={first(sp.bayar) === "gagal"}
+              />
+            </div>
+          )}
+
           <div className="border-t border-border p-5 sm:p-6">
             <h2 className="text-base font-bold text-navy">Langkah berikutnya</h2>
             <ol className="mt-4 grid gap-0">
@@ -153,7 +212,7 @@ async function Content({ params }: { params: PageProps<"/pesanan/[code]">["param
             className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-navy px-6 text-sm font-semibold text-white transition-colors hover:bg-navy-soft"
           >
             <MessageCircle className="size-4" aria-hidden />
-            Konfirmasi lewat WhatsApp
+            {payOnSite ? "Tanya lewat WhatsApp" : "Konfirmasi lewat WhatsApp"}
           </a>
         )}
         <Link

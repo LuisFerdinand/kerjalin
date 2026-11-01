@@ -6,9 +6,12 @@ import Link from "next/link";
 import { AlertCircle, BadgeCheck, Clock, MessageCircle, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { SubmitButton, useActionForm } from "@/components/forms/action-form";
+import { FieldError, SubmitButton, useActionForm } from "@/components/forms/action-form";
 import { FormField } from "@/components/forms/form-field";
+import { MethodOptions } from "@/components/payment/method-options";
+import type { PaymentMethodKey } from "@/db/schema";
 import { formatIDR } from "@/lib/format";
+import type { CheckoutMethod } from "@/lib/payments/meta";
 import type { DisplayPlan } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { placeOrderAction } from "./actions";
@@ -29,6 +32,7 @@ export function CheckoutForm({
   initialMonths,
   seller,
   selfAgent,
+  methods,
 }: {
   product: CheckoutProduct;
   plans: DisplayPlan[];
@@ -37,15 +41,20 @@ export function CheckoutForm({
   seller: { name: string; code: string } | null;
   /** Pengunjung adalah agen yang sedang masuk: penjualan dicatat atas namanya. */
   selfAgent: boolean;
+  /** Metode bayar yang aktif. Kosong = pembayaran dikonfirmasi lewat WhatsApp. */
+  methods: CheckoutMethod[];
 }) {
   const { state, formProps, pending } = useActionForm(placeOrderAction, { silent: true });
   const [months, setMonths] = useState(initialMonths);
+  const [methodKey, setMethodKey] = useState<PaymentMethodKey | null>(methods[0]?.key ?? null);
   const plan = plans.find((p) => p.months === months) ?? plans[0];
+  const method = methods.find((m) => m.key === methodKey) ?? null;
 
   return (
     <form {...formProps} noValidate className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10">
       <input type="hidden" name="slug" value={product.slug} />
       <input type="hidden" name="paket" value={plan.months} />
+      {method && <input type="hidden" name="metode" value={method.key} />}
       {/* Kolom jebakan bot: tersembunyi dari manusia dan pembaca layar. */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label>
@@ -128,6 +137,18 @@ export function CheckoutForm({
             <Input id="kodeAgen" name="kodeAgen" defaultValue={seller?.code ?? ""} autoComplete="off" placeholder="mis. KJ7ERRTU" className="h-11 uppercase" />
           </FormField>
         </section>
+
+        {methods.length > 0 && (
+          <section className="rounded-2xl border border-border bg-white p-5 shadow-card sm:p-6">
+            <h2 className="text-base font-bold text-navy">4. Metode pembayaran</h2>
+            <div className="mt-4">
+              <MethodOptions methods={methods} value={methodKey} onChange={setMethodKey} name="metode-pilihan" />
+            </div>
+            <div className="mt-2">
+              <FieldError state={state} name="metode" />
+            </div>
+          </section>
+        )}
       </div>
 
       <aside className="grid gap-4 lg:sticky lg:top-24" aria-label="Ringkasan pesanan">
@@ -159,22 +180,42 @@ export function CheckoutForm({
               <span className="text-2xl leading-none font-extrabold tabular-nums">{formatIDR(plan.price)}</span>
             </div>
 
-            <SubmitButton type="submit" size="lg" pending={pending} pendingText="Membuat pesanan…" className="mt-4 h-12 w-full rounded-xl">
-              Buat Pesanan
+            <SubmitButton type="submit" size="lg" pending={pending} pendingText="Memproses…" className="mt-4 h-12 w-full rounded-xl">
+              {method?.kind === "gateway" ? "Lanjut ke pembayaran" : method?.kind === "qris" ? "Pesan dan tampilkan QRIS" : "Buat Pesanan"}
             </SubmitButton>
-            <p className="mt-3 text-center text-xs text-muted-foreground">Belum ada pembayaran sekarang. Kamu mendapat kode pesanan lebih dulu.</p>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              {method?.kind === "gateway"
+                ? `Kamu diarahkan ke halaman bayar ${method.label}.`
+                : method?.kind === "qris"
+                  ? "Kode QRIS tampil di halaman berikutnya."
+                  : "Belum ada pembayaran sekarang. Kamu mendapat kode pesanan lebih dulu."}
+            </p>
           </div>
         </div>
 
         <ul className="grid gap-3 rounded-2xl border border-border bg-muted p-4 text-sm text-navy">
-          <li className="flex items-start gap-3">
-            <MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Tim Kerjalin atau agenmu menghubungi lewat WhatsApp untuk instruksi pembayaran.
-          </li>
-          <li className="flex items-start gap-3">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Pembayaran dikonfirmasi manual oleh admin. Tidak ada tagihan otomatis.
-          </li>
+          {method?.kind === "gateway" ? (
+            <li className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Pembayaran diproses {method.label}. Pesananmu otomatis lunas begitu pembayaran berhasil.
+            </li>
+          ) : method?.kind === "qris" ? (
+            <li className="flex items-start gap-3">
+              <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Setelah scan QRIS, kirim konfirmasi di halaman pesanan. Admin memeriksa pembayaranmu secara manual.
+            </li>
+          ) : (
+            <>
+              <li className="flex items-start gap-3">
+                <MessageCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
+                Tim Kerjalin atau agenmu menghubungi lewat WhatsApp untuk instruksi pembayaran.
+              </li>
+              <li className="flex items-start gap-3">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+                Pembayaran dikonfirmasi manual oleh admin. Tidak ada tagihan otomatis.
+              </li>
+            </>
+          )}
           {product.soon && (
             <li className="flex items-start gap-3">
               <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />

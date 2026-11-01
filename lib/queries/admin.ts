@@ -6,6 +6,7 @@ import {
   eq,
   ilike,
   inArray,
+  isNotNull,
   or,
   sql,
   type SQL,
@@ -547,10 +548,11 @@ export async function listAgentOptions() {
 /*  Produk, pesanan, penarikan                                                 */
 /* -------------------------------------------------------------------------- */
 
-export async function listOrders(params: { status?: OrderStatus; q?: string }) {
+export async function listOrders(params: { status?: OrderStatus; q?: string; awaitingVerification?: boolean }) {
   const sellerUser = alias(user, "seller_user");
   const filters: (SQL | undefined)[] = [];
   if (params.status) filters.push(eq(orders.status, params.status));
+  if (params.awaitingVerification) filters.push(and(eq(orders.status, "pending"), isNotNull(orders.paymentSubmittedAt)));
   if (params.q?.trim()) {
     const like = `%${params.q.trim()}%`;
     filters.push(
@@ -562,6 +564,12 @@ export async function listOrders(params: { status?: OrderStatus; q?: string }) {
       order: orders,
       sellerName: sellerUser.name,
       sellerId: agents.id,
+      /** Bukti bayar terbaru dari pelanggan (QRIS). Hanya ID-nya; gambarnya diambil lewat /api/payments/proof/[id]. */
+      proofId: sql<string | null>`(
+        select pf.id from payment_files pf
+        where pf.order_id = ${orders.id} and pf.kind = 'proof'
+        order by pf.created_at desc limit 1
+      )`,
     })
     .from(orders)
     .leftJoin(agents, eq(orders.agentId, agents.id))
@@ -610,6 +618,7 @@ export async function getOrderCounts() {
       paid: sql<number>`(count(*) filter (where ${orders.status} = 'paid'))::int`,
       cancelled: sql<number>`(count(*) filter (where ${orders.status} = 'cancelled'))::int`,
       refunded: sql<number>`(count(*) filter (where ${orders.status} = 'refunded'))::int`,
+      verify: sql<number>`(count(*) filter (where ${orders.status} = 'pending' and ${orders.paymentSubmittedAt} is not null))::int`,
     })
     .from(orders);
   return {
@@ -618,6 +627,7 @@ export async function getOrderCounts() {
     paid: num(row?.paid),
     cancelled: num(row?.cancelled),
     refunded: num(row?.refunded),
+    verify: num(row?.verify),
   };
 }
 

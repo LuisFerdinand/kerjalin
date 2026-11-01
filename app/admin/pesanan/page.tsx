@@ -8,8 +8,10 @@ import { OrderStatusBadge } from "@/components/app/badges";
 import { EmptyState, PageHeader } from "@/components/app/page-header";
 import { TabsNav } from "@/components/app/tabs-nav";
 import { CreateOrderDialog, OrderRowActions } from "@/components/admin/order-actions";
+import { PaymentProofDialog } from "@/components/admin/payment-proof";
 import { ORDER_STATUSES } from "@/db/schema";
 import { formatDate, formatIDR } from "@/lib/format";
+import { PAYMENT_META } from "@/lib/payments/meta";
 import { getOrderCounts, getTreeNodes, listOrders } from "@/lib/queries/admin";
 import { listSellableProducts } from "@/lib/queries/catalog";
 import { first, pickEnum } from "@/lib/search-params";
@@ -21,10 +23,11 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
   await requireAdmin();
   const sp = await props.searchParams;
   const q = first(sp.q);
-  const status = pickEnum(sp.status, ORDER_STATUSES);
+  const verify = first(sp.verifikasi) === "1";
+  const status = verify ? undefined : pickEnum(sp.status, ORDER_STATUSES);
 
   const [rows, sellable, agents, counts] = await Promise.all([
-    listOrders({ q, status }),
+    listOrders({ q, status, awaitingVerification: verify }),
     listSellableProducts(),
     getTreeNodes(),
     getOrderCounts(),
@@ -35,14 +38,19 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
     if (value) p.set("status", value);
     if (q) p.set("q", q);
     const qs = p.toString();
-    return { label, count, active: status === value, href: qs ? `/admin/pesanan?${qs}` : "/admin/pesanan" };
+    return { label, count, active: !verify && status === value, href: qs ? `/admin/pesanan?${qs}` : "/admin/pesanan" };
+  };
+  const verifyTab = () => {
+    const p = new URLSearchParams({ verifikasi: "1" });
+    if (q) p.set("q", q);
+    return { label: "Perlu verifikasi", count: counts.verify, active: verify, href: `/admin/pesanan?${p}` };
   };
 
   return (
     <>
       <PageHeader
         title="Pesanan"
-        description="Catat langganan dan tandai lunas untuk membagikan komisi. Nantinya terhubung ke pembayaran otomatis."
+        description="Pesanan lewat payment gateway lunas otomatis. Pembayaran QRIS dan transfer manual diperiksa di sini, lalu tandai lunas untuk membagikan komisi."
         actions={
           <CreateOrderDialog
             products={sellable}
@@ -61,6 +69,7 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
         items={[
           tab("Semua", undefined, counts.all),
           tab("Menunggu", "pending", counts.pending),
+          ...(counts.verify > 0 || verify ? [verifyTab()] : []),
           tab("Lunas", "paid", counts.paid),
           tab("Dibatalkan", "cancelled", counts.cancelled),
           tab("Direfund", "refunded", counts.refunded),
@@ -69,6 +78,7 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
 
       <form action="/admin/pesanan" className="flex items-center gap-2 py-4">
         {status && <input type="hidden" name="status" value={status} />}
+        {verify && <input type="hidden" name="verifikasi" value="1" />}
         <div className="relative w-full sm:max-w-sm">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-faint" />
           <Input name="q" defaultValue={q} placeholder="Cari kode, pelanggan, atau agen" className="pl-9" aria-label="Cari pesanan" />
@@ -78,7 +88,7 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
         </Button>
         {q && (
           <Button asChild variant="ghost">
-            <Link href={status ? `/admin/pesanan?status=${status}` : "/admin/pesanan"}>Reset</Link>
+            <Link href={verify ? "/admin/pesanan?verifikasi=1" : status ? `/admin/pesanan?status=${status}` : "/admin/pesanan"}>Reset</Link>
           </Button>
         )}
         <p className="ml-auto hidden text-[0.8125rem] text-muted-foreground sm:block">{rows.length} pesanan</p>
@@ -87,7 +97,7 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
       {rows.length === 0 ? (
         <EmptyState
           icon={ReceiptText}
-          title={q || status ? "Tidak ada pesanan yang cocok" : "Belum ada pesanan"}
+          title={q || status || verify ? "Tidak ada pesanan yang cocok" : "Belum ada pesanan"}
           description="Klik Catat penjualan untuk menambahkan langganan pertama."
         />
       ) : (
@@ -106,7 +116,7 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map(({ order: o, sellerName, sellerId }) => (
+                {rows.map(({ order: o, sellerName, sellerId, proofId }) => (
                   <TableRow key={o.id}>
                     <TableCell className="pl-5">
                       <p className="font-semibold text-navy">{o.productName}</p>
@@ -129,13 +139,33 @@ export default async function OrdersPage(props: PageProps<"/admin/pesanan">) {
                     </TableCell>
                     <TableCell>
                       <OrderStatusBadge status={o.status} />
+                      {o.paymentMethod && (
+                        <p className="mt-1 text-[0.8125rem] text-muted-foreground">
+                          {PAYMENT_META[o.paymentMethod].label}
+                          {o.status === "pending" && o.paymentSubmittedAt && " · perlu verifikasi"}
+                        </p>
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">{formatIDR(o.amount)}</TableCell>
                     <TableCell className="text-right tabular-nums text-muted-foreground">
                       {o.status === "paid" ? formatIDR(o.adminAmount) : "-"}
                     </TableCell>
                     <TableCell className="pr-5">
-                      <OrderRowActions id={o.id} code={o.code} status={o.status} amount={o.amount} />
+                      <div className="flex items-center justify-end gap-2">
+                        {o.paymentMethod === "qris" && (o.paymentSubmittedAt || proofId) && (
+                          <PaymentProofDialog
+                            id={o.id}
+                            code={o.code}
+                            status={o.status}
+                            amount={o.amount}
+                            customerName={o.customerName}
+                            proofId={proofId}
+                            submittedAt={o.paymentSubmittedAt}
+                            note={o.paymentNote}
+                          />
+                        )}
+                        <OrderRowActions id={o.id} code={o.code} status={o.status} amount={o.amount} />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

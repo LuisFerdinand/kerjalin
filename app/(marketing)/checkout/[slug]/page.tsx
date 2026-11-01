@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { Rise } from "@/components/marketing/rise";
 import { Skeleton } from "@/components/ui/skeleton";
 import { REF_COOKIE } from "@/lib/config";
+import { listCheckoutMethods } from "@/lib/payments/service";
 import { displayPlans } from "@/lib/pricing";
 import { getProductBySlug } from "@/lib/queries/catalog";
 import { lookupSeller } from "@/lib/queries/public";
@@ -45,7 +46,11 @@ async function Content({
   const wanted = Number(first(sp.paket));
   const initialMonths = plans.find((p) => p.months === wanted)?.months ?? plans[0].months;
 
-  const [seller, session] = await Promise.all([lookupSeller((await cookies()).get(REF_COOKIE)?.value), getSession()]);
+  const [seller, session, methods] = await Promise.all([
+    lookupSeller((await cookies()).get(REF_COOKIE)?.value),
+    getSession(),
+    listCheckoutMethods(),
+  ]);
   const profile = session && session.user.role !== "super_admin" ? await getAgentByUserId(session.user.id) : null;
 
   return (
@@ -80,6 +85,7 @@ async function Content({
           initialMonths={initialMonths}
           seller={seller ? { name: seller.name, code: seller.code } : null}
           selfAgent={profile?.agent.status === "active"}
+          methods={methods}
         />
       </Rise>
     </>

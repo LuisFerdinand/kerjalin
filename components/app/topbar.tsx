@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ExternalLink, Search } from "lucide-react";
@@ -25,6 +25,7 @@ const SECTION_LABELS: Record<string, string> = {
   kategori: "Kategori",
   pesanan: "Pesanan",
   penarikan: "Penarikan",
+  pembayaran: "Pembayaran",
   tim: "Tim saya",
   penjualan: "Penjualan",
   komisi: "Riwayat komisi",
@@ -105,7 +106,7 @@ function QuickSearch({ variant }: { variant: Variant }) {
   );
 }
 
-export function AppTopbar({ variant }: { variant: Variant }) {
+export function AppTopbar({ variant, account }: { variant: Variant; account: ReactNode }) {
   return (
     <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-white/90 px-4 backdrop-blur md:px-6">
       <SidebarTrigger className="-ml-1 text-navy md:hidden" />
@@ -119,10 +120,11 @@ export function AppTopbar({ variant }: { variant: Variant }) {
           target="_blank"
           aria-label="Lihat situs"
           title="Lihat situs"
-          className="grid size-10 place-items-center rounded-xl border border-border text-navy transition-colors hover:border-navy/40 hover:bg-muted"
+          className="hidden size-10 place-items-center rounded-xl border border-border text-navy transition-colors hover:border-navy/40 hover:bg-muted sm:grid"
         >
           <ExternalLink className="size-4" aria-hidden />
         </Link>
+        {account}
       </div>
     </header>
   );

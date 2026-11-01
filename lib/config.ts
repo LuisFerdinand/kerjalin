@@ -38,6 +38,9 @@ function resolveSiteUrl() {
 
 const siteUrl = resolveSiteUrl();
 
+/** Situs berjalan di komputer lokal, sehingga gateway tidak bisa memanggil balik webhook-nya. */
+export const siteIsLocal = LOCAL_HOST.test(siteUrl);
+
 /**
  * Asal (origin) yang boleh memanggil API login. Better Auth menolak permintaan dari asal lain
  * dengan "Invalid origin", jadi daftar ini harus mencakup setiap alamat yang dipakai untuk membuka situs.

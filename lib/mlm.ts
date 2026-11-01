@@ -12,6 +12,7 @@ import {
   type Agent,
   type AgentLevel,
   type AgentStatus,
+  type PaymentMethodKey,
 } from "@/db/schema";
 import { MIN_WITHDRAWAL } from "@/lib/config";
 import { formatIDR } from "@/lib/format";
@@ -293,6 +294,8 @@ export async function createOrder(input: {
   /** Total yang dibayar pelanggan. Default: harga produk × bulan. */
   amount?: number;
   note?: string | null;
+  /** Metode bayar yang dipilih pelanggan di checkout. Pembayarannya dimulai di lib/payments. */
+  paymentMethod?: PaymentMethodKey | null;
   markPaid: boolean;
 }) {
   return db.transaction(async (tx) => {
@@ -327,6 +330,7 @@ export async function createOrder(input: {
         amount,
         adminAmount: 0,
         note: input.note ?? null,
+        paymentMethod: input.paymentMethod ?? null,
       })
       .returning();
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AppShell } from "@/components/app/shell";
 import { AppSidebar } from "@/components/app/app-sidebar";
+import { AccountMenu, AccountMenuSkeleton } from "@/components/app/user-menu";
 import { requireAgent } from "@/lib/session";
 
 export const metadata: Metadata = {
@@ -13,9 +14,10 @@ export default function AgentLayout({ children }: LayoutProps<"/dashboard">) {
   return (
     <AppShell
       variant="agent"
-      sidebar={
-        <Suspense fallback={<AppSidebar variant="agent" user={null} />}>
-          <AgentSidebar />
+      sidebar={<AppSidebar variant="agent" />}
+      account={
+        <Suspense fallback={<AccountMenuSkeleton />}>
+          <AgentAccount />
         </Suspense>
       }
     >
@@ -24,12 +26,7 @@ export default function AgentLayout({ children }: LayoutProps<"/dashboard">) {
   );
 }
 
-async function AgentSidebar() {
+async function AgentAccount() {
   const { user, level } = await requireAgent();
-  return (
-    <AppSidebar
-      variant="agent"
-      user={{ name: user.name, email: user.email, image: user.image ?? null, caption: level.name }}
-    />
-  );
+  return <AccountMenu variant="agent" user={{ name: user.name, email: user.email, image: user.image ?? null, caption: level.name }} />;
 }

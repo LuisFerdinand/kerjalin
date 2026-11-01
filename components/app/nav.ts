@@ -1,6 +1,7 @@
 import {
   Banknote,
   Boxes,
+  CreditCard,
   Layers,
   LayoutDashboard,
   Network,
@@ -62,6 +63,7 @@ export const NAV: Record<Variant, NavGroup[]> = {
           badgeKey: "pendingWithdrawals",
           badgeLabel: "penarikan perlu diproses",
         },
+        { href: "/admin/pembayaran", label: "Pembayaran", icon: CreditCard },
       ],
     },
   ],
