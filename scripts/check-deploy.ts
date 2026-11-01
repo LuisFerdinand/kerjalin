@@ -57,6 +57,9 @@ function checkEnv() {
   else if (cloud.length === 0) add("warn", "Cloudinary kosong: unggah gambar produk dan bukti transfer tidak berfungsi (gambar lokal di /public tetap bisa dipakai).");
   else add("warn", "Cloudinary terisi sebagian. Ketiga variabelnya harus ada.");
 
+  if (env("PAYMENT_ENCRYPTION_KEY")) add("ok", "PAYMENT_ENCRYPTION_KEY terisi.");
+  else add("warn", "PAYMENT_ENCRYPTION_KEY kosong: kredensial payment gateway dienkripsi dengan BETTER_AUTH_SECRET, jadi mengganti secret itu membuat kredensial harus dimasukkan ulang.");
+
   if (!env("NEXT_PUBLIC_WHATSAPP_NUMBER")) add("warn", "NEXT_PUBLIC_WHATSAPP_NUMBER kosong: tombol WhatsApp di halaman produk dan pesanan tidak tampil.");
 }
 
@@ -72,7 +75,7 @@ async function checkDatabase() {
     return;
   }
 
-  const expected = ["user", "session", "account", "verification", "agent_levels", "agents", "categories", "products", "orders", "wallet_entries", "withdrawals"];
+  const expected = ["user", "session", "account", "verification", "agent_levels", "agents", "categories", "products", "orders", "wallet_entries", "withdrawals", "payment_methods", "payment_files"];
   const have = await db.execute<{ table_name: string }>(sql`select table_name from information_schema.tables where table_schema = 'public'`);
   const names = new Set(have.rows.map((r) => r.table_name));
   const missing = expected.filter((t) => !names.has(t));

@@ -49,6 +49,7 @@ terakhir lengkap dengan komisi dan bonus tim, tiga penarikan, serta katalog cont
 | `AUTH_TRUSTED_ORIGINS` | tidak | Alamat tambahan yang boleh memanggil API login, dipisah koma |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | opsional | Tombol "Masuk dengan Google" muncul bila keduanya terisi |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_FOLDER` | opsional | Upload gambar produk & bukti transfer |
+| `PAYMENT_ENCRYPTION_KEY` | disarankan | Kunci enkripsi kredensial payment gateway di database. Kosong = memakai `BETTER_AUTH_SECRET`. Lihat [Pembayaran](#pembayaran) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_CONTACT_EMAIL` | opsional | Kontak di footer & halaman produk |
 | `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | untuk seed | Akun Super Admin awal |
 
@@ -173,12 +174,39 @@ Belum ada fitur "lupa password" lewat email; pengaturan ulang dilakukan admin le
 
 Halaman produk punya tombol **Pesan Sekarang** (produk "segera hadir" memakai **Pesan Lebih Awal**) menuju
 `/checkout/<slug>?paket=<bulan>`. Pelanggan mengisi nama dan WhatsApp, lalu mendapat kode pesanan di `/pesanan/<kode>`.
-Pesanan berstatus **menunggu**; admin menandainya lunas di *Pesanan* setelah pembayaran dikonfirmasi manual, dan saat itu
-komisi dibagikan lewat `payOrder`. Harga dihitung ulang di server dari paket produk, bukan dari browser.
+Pesanan berstatus **menunggu** sampai pembayaran dikonfirmasi (otomatis oleh payment gateway, atau oleh admin di *Pesanan*),
+dan saat itu komisi dibagikan lewat `payOrder`. Harga dihitung ulang di server dari paket produk, bukan dari browser.
+Bila ada metode bayar yang aktif, pelanggan memilihnya di checkout (lihat [Pembayaran](#pembayaran)); bila tidak ada,
+alurnya seperti semula: tim menghubungi lewat WhatsApp dan admin menandai lunas.
 
 Atribusi agen: kode yang diisi pembeli, lalu cookie `kj_ref`, lalu agen yang sedang masuk. Agen membagikan **link jual**
 per produk dari *Katalog produk*, yaitu `/r/<kode-referral>?to=/produk/<slug>` (tujuan `to` hanya boleh `/produk`,
 `/checkout`, atau `/daftar`). Perlindungan spam: kolom jebakan bot dan batas 3 pesanan menunggu per nomor per jam.
+
+## Pembayaran
+
+Super Admin mengatur metode bayar di **Admin → Pembayaran** (`/admin/pembayaran`), tanpa mengubah kode atau environment:
+
+| Metode | Cara kerja |
+| --- | --- |
+| **Midtrans** (Snap) | Pelanggan diarahkan ke halaman bayar Midtrans. Pesanan lunas otomatis lewat webhook. Isi **Server Key**, pilih Sandbox/Produksi |
+| **Xendit** (Invoice) | Sama, lewat invoice Xendit. Isi **Secret API Key** dan (disarankan) **Callback verification token** |
+| **QRIS manual** | Admin mengunggah gambar QRIS miliknya. Pelanggan memindainya di halaman pesanan, mengirim konfirmasi dan bukti bayar (opsional), lalu admin memeriksa mutasi dan menekan **Lunas** di *Pesanan* → tab *Perlu verifikasi* |
+
+Beberapa hal yang perlu diketahui:
+
+- **Kredensial** disimpan terenkripsi (AES-256-GCM) di tabel `payment_methods` dan tidak pernah dikirim ke browser; formulir hanya
+  menampilkan 4 karakter terakhir. Kunci enkripsinya `PAYMENT_ENCRYPTION_KEY` (atau `BETTER_AUTH_SECRET`). Mengganti kunci itu
+  membuat kredensial lama tidak terbaca, jadi masukkan ulang di panel.
+- **Webhook**: daftarkan alamat yang tertera di kartu tiap gateway (`/api/payments/midtrans`, `/api/payments/xendit`) di dashboard
+  gateway. Midtrans diverifikasi dengan tanda tangan SHA-512; Xendit dengan token callback dan konfirmasi ulang status ke API Xendit.
+  Nominal selalu dicocokkan dengan pesanan sebelum ditandai lunas, dan prosesnya idempoten.
+- **Tanpa webhook** (mis. di localhost): tombol *Cek status pembayaran* di halaman pesanan menanyakan status ke gateway dan melunasi
+  pesanan bila sudah dibayar. Halaman juga memeriksanya otomatis saat pelanggan kembali dari halaman bayar.
+- **Uji coba**: pakai Midtrans Sandbox atau kunci `xnd_development_…`. Tombol *Uji koneksi* memeriksa kunci tanpa membuat transaksi.
+- **QRIS** statis tidak memuat nominal, jadi halaman pesanan menampilkan total dengan tombol salin. Gambar QRIS dan bukti bayar
+  disimpan di database (`payment_files`), jadi tidak butuh Cloudinary; bukti dikecilkan di browser dan hanya bisa dibuka admin.
+- Uang yang masuk tetap melewati satu pintu: `markOrderPaid` di `lib/mlm.ts`. Kode pembayaran ada di `lib/payments/`.
 
 ## Cara kerja jaringan agen
 

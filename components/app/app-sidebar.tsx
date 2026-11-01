@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useLayoutEffect } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -21,19 +21,6 @@ import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 import { NAV, isActive, type NavItem, type Variant } from "./nav";
 import { SignOutButton } from "./user-menu";
-
-/** Ingat pilihan ciut/terbuka dari kunjungan sebelumnya (cookie ditulis oleh SidebarProvider). */
-function SidebarMemory() {
-  const { setOpen } = useSidebar();
-  // Sebelum browser menggambar, supaya sidebar tidak sempat tampil terbuka lalu menciut.
-  useLayoutEffect(() => {
-    const saved = document.cookie.split("; ").find((c) => c.startsWith("sidebar_state="));
-    if (saved?.endsWith("=false")) setOpen(false);
-    // Hanya saat pertama dimuat.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return null;
-}
 
 /** Tombol untuk menciutkan dan membuka kembali sidebar. Di versi ciut, tombol ini berada di bawah logo. */
 function CollapseToggle() {
@@ -140,8 +127,6 @@ export function AppSidebar({ variant, badges = {} }: { variant: Variant; badges?
       collapsible="icon"
       className="z-30! border-r-0! [&_[data-sidebar=sidebar]]:bg-[linear-gradient(180deg,#0c2f7a_0%,#082052_42%,#061a45_100%)]"
     >
-      <SidebarMemory />
-
       {/* Saat diciutkan, header dan footer memakai jarak yang sama dengan daftar menu (8px kiri, 0 kanan) supaya ikon sejajar. */}
       <SidebarHeader className="px-5 pt-5 pb-2 group-data-[collapsible=icon]:pr-0 group-data-[collapsible=icon]:pl-2">
         <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-3">
